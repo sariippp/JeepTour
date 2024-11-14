@@ -10,4 +10,9 @@ class TicketingController extends Controller
     {
         return view('ticketing.index');
     }
+
+    public function orderLog(){
+        return view('ticketing.order');
+        // belum ada halamannya
+    }
 }
