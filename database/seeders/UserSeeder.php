@@ -20,11 +20,26 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'admin'
         ]);
+        User::create([
+            'username' => 'syarif',
+            'password' => Hash::make('123'),
+            'role' => 'admin'
+        ]);
 
         // Make Ticketing
         User::create([
             'username' => 'ticket',
             'password' => Hash::make('password'),
+            'role' => 'ticketing'
+        ]);
+        User::create([
+            'username' => 'awik',
+            'password' => Hash::make('123'),
+            'role' => 'ticketing'
+        ]);
+        User::create([
+            'username' => 'josh',
+            'password' => Hash::make('123'),
             'role' => 'ticketing'
         ]);
     }

@@ -15,6 +15,10 @@ Route::group(
     ['middleware' => 'admin', 'prefix' => 'admin', 'as' => 'admin.'],
     function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::get('/users', [AdminController::class, 'showUsers'])->name('users');
+        Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+
     }
 );
 

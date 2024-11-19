@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard')</title>
     @vite('resources/css/app.css')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-50">
@@ -32,7 +34,7 @@
                         </svg>
                         <span>Dashboard</span>
                     </a>
-                    <a href="{{ route('admin.index') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('admin.users') ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50' }}">
+                    <a href="{{ route('admin.users') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('admin.users') ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50' }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
