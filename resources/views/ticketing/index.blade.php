@@ -7,29 +7,41 @@
     <h1 class="text-lg font-medium mb-4">Plotting Jeep</h1>
 
     <!-- Plotting -->
-     <!-- perlu data reservasi dan sesi -->
-    <div class="bg-white p-6 rounded-lg border border-gray-200">
-        <!-- tanggal di loop untuk semua tanggal -->
-        <h2 class="text-lg font-medium mb-4">Tanggal</h2>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between py-3 border-b last:border-0">
-                <h3 class="font-medium">Sesi</h3>
-            </div>
-            @foreach(range(1, 5) as $i)
-                <div class="flex items-center justify-between py-3 border-b last:border-0">
-                    <div class="flex items-center space-x-4">
-                        <div>
-                            <p class="font-medium">Pelanggan {{ $i }} - Kota</p>
-                            <p class="text-sm text-gray-500">Jumlah: 2</p>
-                            <p class="text-sm text-gray-500">QRIS (status pembayaran)</p>
+    <!-- perlu data reservasi dan sesi -->
+
+    @foreach($datesForward as $date)
+        <div class="bg-white p-6 rounded-lg border border-gray-200">
+            <!-- tanggal di loop untuk semua tanggal -->
+            <h2 class="text-lg font-medium mb-4">{{$date->day_group}} {{$date->month_group}} {{$date->year_group}}</h2>
+            <div class="space-y-4">
+                @foreach($sessions as $session)
+                    @if($session->date == $date->full_date)
+                        <div class="flex items-center justify-between py-3 border-b last:border-0">
+                            <h3 class="font-medium">{{$session->session_hour}}</h3>
                         </div>
-                    </div>
-                    <span>
-                        <button>Plot</button>
-                    </span>
-                </div>
-            @endforeach
+                        @foreach($orders as $order)
+                            @if($date->full_date == $order->date && $session->session_hour == $order->session_hour)
+                                <div class="flex items-center justify-between py-3 border-b last:border-0">
+                                    <div class="flex items-center space-x-4">
+                                        <div>
+                                            <p class="font-medium">{{$order->name}} - {{$order->city}}</p>
+                                            <p class="text-sm text-gray-500">Jumlah: {{$order->passenger_count}}</p>
+                                            <p class="text-sm text-gray-500">QRIS (status pembayaran)</p>
+                                        </div>
+                                    </div>
+                                    <span>
+                                        <button>Plot</button>
+                                    </span>
+                                </div>
+                            @endif
+
+                        @endforeach
+                    @endif
+
+                @endforeach
+            </div>
         </div>
-    </div>
+    @endforeach
+
 </div>
 @endsection
