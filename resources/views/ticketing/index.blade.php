@@ -25,6 +25,7 @@
                                     <div class="flex items-center space-x-4">
                                         <div>
                                             <p class="font-medium">{{$order->name}} - {{$order->city}}</p>
+                                            <p class="font-medium">{{$order->reservation_id}}</p>
                                             <p class="text-sm text-gray-500">Jumlah: {{$order->passenger_count}}</p>
                                             <p class="text-sm text-gray-500">QRIS (status pembayaran)</p>
                                         </div>
