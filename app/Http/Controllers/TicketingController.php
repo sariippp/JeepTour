@@ -39,7 +39,7 @@ class TicketingController extends Controller
         ('reservations.date as full_date,DAY(reservations.date) as day_group, 
         MONTHNAME(reservations.date) as month_group, 
         YEAR(reservations.date) as year_group')
-            ->where('reservations.date', '>=', Carbon::today())->orderBy('reservations.date', 'asc')
+            ->where('reservations.date', '>=', Carbon::today())->distinct()->orderBy('reservations.date', 'asc')
             ->get();
 
 
