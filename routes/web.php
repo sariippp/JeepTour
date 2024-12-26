@@ -24,8 +24,15 @@ Route::group(
         Route::get('/financial/invoices', [AdminController::class, 'invoiceIndex'])->name('financial.invoices');
         Route::post('/financial/report', [AdminController::class, 'generateFinancialReport'])->name('financial.report');
         Route::get('/financial/invoices/export', [AdminController::class, 'exportToExcel'])->name('invoices.export');
-
-    }
+        // Jeep Management
+        Route::get('/jeeps', [AdminController::class, 'jeepManagement'])->name('jeeps');
+        Route::post('/jeeps/owners', [AdminController::class, 'storeOwner'])->name('jeeps.owners.store');
+        Route::put('/jeeps/owners/{id}', [AdminController::class, 'updateOwner'])->name('jeeps.owners.update');
+        Route::delete('/jeeps/owners/{id}', [AdminController::class, 'deleteOwner'])->name('jeeps.owners.delete');
+        Route::post('/jeeps/vehicles', [AdminController::class, 'storeJeep'])->name('jeeps.vehicles.store');
+        Route::put('/jeeps/vehicles/{id}', [AdminController::class, 'updateJeep'])->name('jeeps.vehicles.update');
+        Route::delete('/jeeps/vehicles/{id}', [AdminController::class, 'deleteJeep'])->name('jeeps.vehicles.delete');
+        }
 );
 
 // ===== Ticketing Route =====

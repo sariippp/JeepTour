@@ -22,7 +22,7 @@ class Jeep extends Model
     }
 
     public function reservations() : BelongsToMany {
-        return $this->belongsToMany(Reservation::class, 'reserved_jeep', 'jeep_id', 'reservation_id')
+        return $this->belongsToMany(Reservation::class, 'reserve_jeep', 'jeep_id', 'reservation_id')
                     ->withTimestamps();
     }
 }

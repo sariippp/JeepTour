@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\InvoicesExport;
 use App\Models\Invoice;
 use App\Models\Jeep;
+use App\Models\Owner;
 use App\Models\Reservation;
 use App\Models\User;
 use Carbon\Carbon;
@@ -61,8 +62,8 @@ class AdminController extends Controller
     {
         $stats = $this->getFinancialStats();
         $recentInvoices = Invoice::with(['reservation'])
+            ->whereDate('created_at', Carbon::today())
             ->latest()
-            ->take(5)
             ->get();
 
         $monthlyRevenue = Invoice::whereMonth('time_paid', Carbon::now()->month)
@@ -132,4 +133,98 @@ class AdminController extends Controller
         return view('admin.financial.report', compact('report'));
     }
 
+    // Jeep Management Methods
+    public function jeepManagement()
+    {
+        $currentMonth = date('Y-m');
+        
+        $ownerData = DB::select("
+            SELECT 
+                o.id, 
+                o.name,
+                COUNT(DISTINCT j.id) as total_jeeps,
+                COALESCE(SUM(r.count), 0) as total_passengers,
+                COALESCE(SUM(CASE WHEN DATE_FORMAT(r.created_at, '%Y-%m') = ? THEN r.count ELSE 0 END), 0) as monthly_passengers
+            FROM owners o
+            LEFT JOIN jeeps j ON o.id = j.owner_id
+            LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
+            LEFT JOIN reservations r ON rj.reservation_id = r.id
+            GROUP BY o.id, o.name", 
+            [$currentMonth]
+        );
+
+        DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
+        
+        $jeeps = DB::select("
+            SELECT 
+                j.*,
+                o.name as owner_name,
+                COUNT(DISTINCT r.id) as total_trips,
+                COALESCE(SUM(r.count), 0) as total_passengers
+            FROM jeeps j
+            JOIN owners o ON j.owner_id = o.id
+            LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
+            LEFT JOIN reservations r ON rj.reservation_id = r.id
+            GROUP BY j.id, j.number_plate, j.owner_id, o.name
+        ");
+
+        return view('admin.jeep.index', compact('ownerData', 'jeeps'));
+    }
+
+    public function storeOwner(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        
+        DB::insert("INSERT INTO owners (name) VALUES (?)", [$request->name]);
+        return response()->json(['success' => true]);
+    }
+
+    public function updateOwner(Request $request, $id)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        
+        DB::update("UPDATE owners SET name = ? WHERE id = ?", [$request->name, $id]);
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteOwner($id)
+    {
+        DB::delete("DELETE FROM owners WHERE id = ?", [$id]);
+        return response()->json(['success' => true]);
+    }
+
+    public function storeJeep(Request $request)
+    {
+        $request->validate([
+            'owner_id' => 'required|exists:owners,id',
+            'number_plate' => 'required|string|max:20|unique:jeeps'
+        ]);
+
+        DB::insert("INSERT INTO jeeps (owner_id, number_plate) VALUES (?, ?)", [
+            $request->owner_id,
+            $request->number_plate
+        ]);
+        return response()->json(['success' => true]);
+    }
+
+    public function updateJeep(Request $request, $id)
+    {
+        $request->validate([
+            'owner_id' => 'required|exists:owners,id',
+            'number_plate' => 'required|string|max:20|unique:jeeps,number_plate,'.$id
+        ]);
+
+        DB::update("UPDATE jeeps SET owner_id = ?, number_plate = ? WHERE id = ?", [
+            $request->owner_id,
+            $request->number_plate,
+            $id
+        ]);
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteJeep($id)
+    {
+        DB::delete("DELETE FROM jeeps WHERE id = ?", [$id]);
+        return response()->json(['success' => true]);
+    }
 }
