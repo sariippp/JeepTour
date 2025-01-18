@@ -6,6 +6,9 @@ use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\InvoicesExport;
+use App\Models\Invoice;
 
 class TicketingController extends Controller
 {
@@ -46,9 +49,29 @@ class TicketingController extends Controller
         return view('ticketing.index', compact('orders', 'datesForward', 'sessions'));
     }
 
-    public function orderLog()
+    public function invoiceIndex(Request $request)
     {
-        return view('ticketing.order');
-        // belum ada halamannya
+        $query = Invoice::with(['reservation']);
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', 'like', "%{$searchTerm}%")
+                ->orWhereHas('reservation', function ($reservationQuery) use ($searchTerm) {
+                    $reservationQuery->where('id', 'like', "%{$searchTerm}%");
+                });
+            });
+        }
+
+        $invoices = $query->latest()->paginate(10);
+
+        return view('ticketing.invoices.index', compact('invoices'));
     }
+
+
+    // public function exportToExcel()
+    // {
+    //     return Excel::download(new InvoicesExport, 'invoices.xlsx');
+    // }
 }

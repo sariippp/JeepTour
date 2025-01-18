@@ -40,5 +40,8 @@ Route::group(
     ['middleware' => 'ticketing', 'prefix' => 'ticketing', 'as' => 'ticketing.'],
     function () {
         Route::get('/', [TicketingController::class, 'index'])->name('index');
+
+        Route::get('/invoices', [TicketingController::class, 'invoiceIndex'])->name('invoices');
+        
     }
 );
