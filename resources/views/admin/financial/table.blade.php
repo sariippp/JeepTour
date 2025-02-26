@@ -2,10 +2,13 @@
     <thead class="bg-gray-50">
         <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Invoice 
+                Order ID
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reservation
+                Customer
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Passengers
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Amount
@@ -14,7 +17,10 @@
                 Status
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                Scheduled Date
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Created
             </th>
         </tr>
     </thead>
@@ -28,35 +34,49 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
-                        Reservation #{{ $invoice->reservation->id }}
+                        {{ $invoice->name }}
                     </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
-                        Rp. {{ number_format($invoice->total, 2) }}
+                        {{ $invoice->passenger_count }}
                     </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    @if($invoice->time_paid)
+                    <div class="text-sm text-gray-900">
+                        Rp. {{ number_format(($invoice->price * $invoice->passenger_count), 0, ',', '.') }}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    @if($invoice->payment_status == 'paid')
                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                             Paid
                         </span>
-                    @else
+                    @elseif($invoice->payment_status == 'pending')
                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
                             Pending
+                        </span>
+                    @else
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                            {{ ucfirst($invoice->payment_status) }}
                         </span>
                     @endif
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
-                        {{ $invoice->created_at->format('M d, Y') }}
+                        {{ \Carbon\Carbon::parse($invoice->session_date)->format('M d, Y') }} {{ $invoice->session_time }}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                        {{ \Carbon\Carbon::parse($invoice->created_at)->format('M d, Y H:i') }}
                     </div>
                 </td>
             </tr>
         @empty
             <tr>
-                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                    No invoices found
+                <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                    No orders found
                 </td>
             </tr>
         @endforelse

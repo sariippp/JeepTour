@@ -1,81 +1,144 @@
 @extends('admin.layout.index')
 
-@section('title', 'Invoices')
+@section('title', 'Orders')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Invoices Management</h1>
-        <div class="flex gap-4">
-            <div class="relative">
-                <input type="text" 
-                    placeholder="Search invoices by ID..." 
-                    class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="searchInput"
-                    value="{{ request('search') }}">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Orders</h1>
+            <div class="flex gap-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search by ID or name..."
+                        class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        id="searchInput" value="{{ request('search') }}">
+                </div>
+                <a href="{{ route('admin.invoices.export') }}" class="bg-green-500 text-white px-4 py-2 rounded">
+                    Export to Excel
+                </a>
             </div>
-            <button 
-                type="button" 
-                onclick="window.location.href='{{ url('admin/financial/invoices/export') }}'" 
-                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-            >
-                Download to Excel
-            </button>
         </div>
-    </div>
 
-    {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500">Total Invoices</h3>
-            <p class="text-2xl font-bold">{{ $invoices->total() }}</p>
+        {{-- Summary Cards --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
+                <p class="text-2xl font-bold">{{ $reservations->total() }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-sm font-medium text-gray-500">Paid Orders</h3>
+                <p class="text-2xl font-bold text-green-600">
+                    {{ $reservations->where('payment_status', 'paid')->count() }}
+                </p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-sm font-medium text-gray-500">Pending Orders</h3>
+                <p class="text-2xl font-bold text-yellow-600">
+                    {{ $reservations->where('payment_status', 'pending')->count() }}
+                </p>
+            </div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500">Paid Invoices</h3>
-            <p class="text-2xl font-bold text-green-600">
-                {{ $invoices->whereNotNull('time_paid')->count() }}
-            </p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500">Pending Invoices</h3>
-            <p class="text-2xl font-bold text-yellow-600">
-                {{ $invoices->whereNull('time_paid')->count() }}
-            </p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500">Total Amount</h3>
-            <p class="text-2xl font-bold">Rp. {{ number_format($invoices->sum('total'), 2) }}</p>
-        </div>
-    </div>
 
-    {{-- Invoices Table --}}
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        @include('admin.financial.table')
-    </div>
+        {{-- Invoices Table --}}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Order ID
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Customer
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Passengers
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            City
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($reservations as $reservation)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">
+                                    #{{ $reservation->id }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {{ $reservation->name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {{ $reservation->count }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {{ $reservation->city }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    Rp. {{ number_format($reservation->price * $reservation->count, 2) }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($reservation->payment_status == 'paid')
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        Paid
+                                    </span>
+                                @elseif($reservation->payment_status == 'pending')
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        {{ ucfirst($reservation->payment_status) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {{ $reservation->created_at->format('M d, Y') }}
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                No orders found
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-    <div class="mt-4">
-        {{ $invoices->links() }}
+        <div class="mt-4">
+            {{ $reservations->links() }}
+        </div>
     </div>
-</div>
 @endsection
 
 @push('scripts')
-<script>
-function viewInvoiceDetails(invoiceId) {
-    window.location.href = `/admin/financial/invoices/${invoiceId}`;
-}
-
-function exportToExcel() {
-    window.location.href = '/admin/financial/invoices/export';
-}
-
-document.getElementById('searchInput').addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') {
-        const searchTerm = e.target.value.trim();
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('search', searchTerm);
-        window.location.search = urlParams.toString();
-    }
-});
-</script>
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') {
+                const searchTerm = e.target.value.trim();
+                window.location.href = '{{ route("admin.financial.invoices") }}?search=' + encodeURIComponent(searchTerm);
+            }
+        });
+    </script>
 @endpush

@@ -15,13 +15,35 @@ class SessionSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($hour = 9; $hour <= 17; $hour++) {
-            $sessionTime = sprintf('%02d:00:00', $hour);
-            
-            Session::create([
-                'session' => $sessionTime,
-                'passenger_count' => 24
-            ]);
-        }
+        Session::create([
+            'date' => '2025-03-01',
+            'session_time' => '09:00',
+            'passenger_count' => 24,
+        ]);
+        Session::create([
+            'date' => '2025-03-01',
+            'session_time' => '10:00',
+            'passenger_count' => 24,
+        ]);
+        Session::create([
+            'date' => '2025-03-01',
+            'session_time' => '11:00',
+            'passenger_count' => 24,
+        ]);
+        Session::create([
+            'date' => '2025-03-02',
+            'session_time' => '09:00',
+            'passenger_count' => 24,
+        ]);
+        Session::create([
+            'date' => '2025-03-02',
+            'session_time' => '10:00',
+            'passenger_count' => 24,
+        ]);
+        Session::create([
+            'date' => '2025-03-02',
+            'session_time' => '11:00',
+            'passenger_count' => 24,
+        ]);
     }
 }

@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('username')->unique();
             $table->string('password');
+            $table->string('name');
+            $table->string('email');
+            $table->string('telp');
             $table->enum('role', ['admin', 'ticketing']);
             //$table->rememberToken();
             $table->timestamps();

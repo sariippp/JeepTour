@@ -7,26 +7,107 @@
     <title>@yield('title', 'Ticketing Dashboard')</title>
     @vite('resources/css/app.css')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Cek Bootstrap CSS -->
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <!-- atau CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        /* Sidebar styles */
+        .sidebar {
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-link {
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+        
+        .sidebar-link:hover {
+            background-color: #f0f5ff;
+        }
+        
+        .sidebar-link.active {
+            background-color: #e0eaff;
+            color: #3b82f6;
+        }
+        
+        /* Header styles */
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        /* Profile button */
+        .profile-button {
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+        }
+        
+        .profile-button:hover {
+            background-color: #e5e7eb;
+        }
+        
+        /* Welcome text */
+        .welcome-text {
+            font-size: 0.95rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+        
+        /* Logout button */
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            padding: 0.75rem 1rem;
+            color: #dc2626;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .logout-btn:hover {
+            background-color: #fef2f2;
+        }
+        
+        /* Responsive tweaks */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .welcome-text {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <div x-data="{ sidebarOpen: true }" class="min-h-screen">
         <!-- Sidebar -->
-        <aside class="fixed top-0 left-0 z-40 h-screen transition-transform duration-300"
+        <aside class="fixed top-0 left-0 z-40 h-screen transition-transform duration-300 sidebar"
                :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
             <div class="h-full w-64 bg-white border-r border-gray-200">
                 <!-- Logo -->
@@ -41,33 +122,40 @@
 
                 <!-- Navigation -->
                 <nav class="p-4 space-y-2">
-                    <a href="{{ route('ticketing.index') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('ticketing.dashboard') ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="{{ route('ticketing.invoices') }}" class="flex items-center space-x-3 p-3 rounded-lg {{ request()->routeIs('ticketing.invoices') ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50' }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
+                <a href="{{ route('ticketing.index') }}" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link {{ request()->routeIs('ticketing.index') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                    <a href="{{ route('ticketing.invoices') }}" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link {{ request()->routeIs('ticketing.invoices') ? 'active' : '' }}">
+                        <i class="fas fa-file-invoice w-5 h-5"></i>
                         <span>Order Log</span>
                     </a>
-                    <a class="nav-item">
+                    <a href="{{ route('ticketing.profile') }}" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link {{ request()->routeIs('ticketing.profile') ? 'active' : '' }}">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+    <span>My Profile</span>
+</a>
+                    <div class="pt-4">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="logout-btn">Logout</button>
+                            <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link text-red-600 hover:bg-red-50 w-full text-left">
+                                <i class="fas fa-sign-out-alt w-5 h-5"></i>
+                                <span>Logout</span>
+                            </button>
                         </form>
-                    </a>
+                    </div>
                 </nav>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <div :class="{'lg:ml-64': sidebarOpen}">
+        <div :class="{'lg:ml-64': sidebarOpen}" class="transition-all duration-300">
             <!-- Header -->
-            <header class="bg-white border-b border-gray-200">
-                <div class="flex items-center justify-between p-4">
+            <header class="bg-white border-b border-gray-200 header">
+                <div class="flex items-center justify-between px-4 py-3">
                     <div class="flex items-center space-x-4">
                         <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-gray-100 rounded-lg">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,14 +163,15 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <button class="p-2 hover:bg-gray-100 rounded-lg relative">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
-                        <div class="w-8 h-8 rounded-full bg-blue-500"></div>
+                    <div class="flex items-center space-x-3">
+                        <div class="welcome-text">
+                            Welcome, <span class="font-medium">{{ Auth::user()->name }}</span>
+                        </div>
+                        <a href="{{ route('ticketing.profile') }}" class="profile-button" title="My Profile">
+    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+</a>
                     </div>
                 </div>
             </header>

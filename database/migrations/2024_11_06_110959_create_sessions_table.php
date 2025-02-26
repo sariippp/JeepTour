@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
-            $table->time('session');
+            $table->date('date'); //tambah ini untuk hari 
+            $table->time('session_time'); //iini untuk jamnya
             $table->integer('passenger_count')->default(24);
             $table->timestamps();
         });

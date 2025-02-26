@@ -11,7 +11,8 @@ class Session extends Model
     use HasFactory;
 
     protected $fillable = [
-        'session',
+        'date',
+        'session_time',
         'passenger_count'
     ];
 

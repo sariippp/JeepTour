@@ -18,42 +18,52 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'session_id' => 1,
             'name' => 'Maya',
+            'email' =>'maya@gmail.com',
+            'telp'=>'081111111112',
             'city' => 'Ende',
             'count' => 3,
             'price' => 45000,
-            'date' => Carbon::now()->subDays(rand(0, 30))->format('Y-m-d') 
+            'payment_status' => 'paid' 
         ]);
         Reservation::create([
             'session_id' => 3,
             'name' => 'Syarif',
-            'city' => 'Surabaya',
-            'count' => 5,
+            'email' =>'syarif@gmail.com',
+            'telp'=>'081113113112',
+            'city' => 'Jakarta',
+            'count' => 2,
             'price' => 45000,
-            'date' => Carbon::now()->subDays(rand(0, 30))->format('Y-m-d') 
+            'payment_status' => 'paid' 
         ]);
         Reservation::create([
             'session_id' => 1,
             'name' => 'Awik',
+            'email' =>'awik@gmail.com',
+            'telp'=>'089161611112',
             'city' => 'Blitar',
-            'count' => 4,
+            'count' => 1,
             'price' => 45000,
-            'date' => Carbon::now()->subDays(rand(0, 30))->format('Y-m-d') 
+            'payment_status' => 'paid' 
         ]);
         Reservation::create([
             'session_id' => 2,
             'name' => 'Ica',
-            'city' => 'Sidoarjo',
-            'count' => 1,
+            'email' =>'ica@gmail.com',
+            'telp'=>'089151671912',
+            'city' => 'Manado',
+            'count' => 6,
             'price' => 45000,
-            'date' => Carbon::now()->subDays(rand(0, 30))->format('Y-m-d') 
+            'payment_status' => 'paid' 
         ]);
         Reservation::create([
-            'session_id' => 3,
-            'name' => 'Nana',
+            'session_id' => 5,
+            'name' => 'Nicole',
+            'email' =>'nicole@gmail.com',
+            'telp'=>'089161611112',
             'city' => 'Surabaya',
             'count' => 2,
             'price' => 45000,
-            'date' => Carbon::now()->subDays(rand(0, 30))->format('Y-m-d') 
+            'payment_status' => 'paid' 
         ]);
     }
 }
