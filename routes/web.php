@@ -33,9 +33,9 @@ Route::group(
         Route::get('/financial/invoices', [AdminController::class, 'invoiceIndex'])->name('financial.invoices');
         Route::post('/financial/report', [AdminController::class, 'generateFinancialReport'])->name('financial.report');
         Route::get('/financial/invoices/export', [AdminController::class, 'exportToExcel'])->name('invoices.export');
-        Route::get('/admin/api/monthly-revenue', [App\Http\Controllers\AdminController::class, 'getMonthlyRevenue'])
+        Route::get('/admin/api/monthly-revenue', [AdminController::class, 'getMonthlyRevenue'])
             ->name('api.monthly-revenue');
-        Route::get('/admin/api/available-years', [App\Http\Controllers\AdminController::class, 'getAvailableYears'])
+        Route::get('/admin/api/available-years', [AdminController::class, 'getAvailableYears'])
             ->name('api.available-years');
 
         Route::get('/jeeps', [AdminController::class, 'jeepManagement'])->name('jeeps');

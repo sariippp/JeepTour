@@ -109,7 +109,6 @@ function printReport() {
 }
 
 function exportReport() {
-    // Implementation for report export
     alert('Export functionality will be implemented');
 }
 </script>

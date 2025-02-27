@@ -37,7 +37,7 @@
         @endif
 
         @foreach($groupedUsers as $role => $users)
-            <h3 class="text-uppercase">{{ $role }}</h3> <!-- Menampilkan nama role -->
+            <h3 class="text-uppercase">{{ $role }}</h3>
             <div class="row">
                 @foreach($users as $user)
                     <div class="col-md-4 mb-3">
@@ -51,7 +51,6 @@
                                     <small><i class="bi bi-telephone"></i> {{ $user->telp }}</small>
                                 </p>
                                 <div class="d-flex justify-content-end">
-                                    <!-- Tombol Delete -->
                                     <form action="{{ route('admin.users.delete', $user->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
@@ -150,10 +149,8 @@
                 createUserForm.addEventListener('submit', function (e) {
                     e.preventDefault();
 
-                    // Clear previous alerts
                     document.getElementById('modalAlerts').innerHTML = '';
 
-                    // Validate password length before submission
                     const password = passwordInput.value;
                     if (password.length < 6) {
                         const alertContainer = document.createElement('div');
@@ -167,16 +164,12 @@
                         return false;
                     }
 
-                    // Create form data object
                     const formData = new FormData(createUserForm);
-
-                    // Show loading state
                     const submitButton = createUserForm.querySelector('button[type="submit"]');
                     const originalButtonText = submitButton.innerHTML;
                     submitButton.innerHTML = 'Saving...';
                     submitButton.disabled = true;
 
-                    // Validate all fields are filled
                     let isValid = true;
                     createUserForm.querySelectorAll('input[required], select[required]').forEach(input => {
                         if (!input.value.trim()) {
@@ -200,7 +193,6 @@
                         return false;
                     }
 
-                    // AJAX submission
                     fetch(createUserForm.action, {
                         method: 'POST',
                         body: formData,
@@ -217,10 +209,8 @@
                             return response.json();
                         })
                         .then(data => {
-                            // Success handling
                             console.log('Success:', data);
 
-                            // Show success message
                             const alertContainer = document.createElement('div');
                             alertContainer.className = 'alert alert-success alert-dismissible fade show';
                             alertContainer.innerHTML = `
@@ -229,23 +219,18 @@
                         `;
                             document.querySelector('.container').prepend(alertContainer);
 
-                            // Close modal
                             const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
                             modal.hide();
 
-                            // Reset form
                             createUserForm.reset();
 
-                            // Reload page after a short delay to show the new user
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1500);
                         })
                         .catch(error => {
-                            // Error handling
                             console.error('Error:', error);
 
-                            // Show error message
                             const alertContainer = document.createElement('div');
                             alertContainer.className = 'alert alert-danger alert-dismissible fade show';
                             alertContainer.innerHTML = `

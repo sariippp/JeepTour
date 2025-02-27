@@ -35,7 +35,6 @@ class TicketingController extends Controller
         $jeepSlots = [];
 
         foreach ($orders as $order) {
-            // Get all available jeeps with their remaining capacity
             $jeeps = DB::table('jeeps')
                 ->join('owners', 'owners.id', '=', 'jeeps.owner_id')
                 ->leftJoin(DB::raw('(
@@ -48,7 +47,6 @@ class TicketingController extends Controller
             ) as booked'), function ($join) {
                     $join->on('booked.jeep_id', '=', 'jeeps.id');
                 })
-                // Add this subquery to check if jeep is already reserved by another reservation
                 ->leftJoin(DB::raw('(
                 SELECT reserve_jeep.jeep_id, reserve_jeep.reservation_id
                 FROM reserve_jeep
@@ -71,15 +69,12 @@ class TicketingController extends Controller
                 ->orderBy('slots_left', 'desc')
                 ->get();
 
-            // Check if this reservation is already plotted to a jeep
             $selectedJeep = DB::table('reserve_jeep')
                 ->where('reservation_id', $order->reservation_id)
                 ->first();
 
-            // Mark selected jeep and check availability
             foreach ($jeeps as $jeep) {
                 $jeep->is_selected = $selectedJeep && $selectedJeep->jeep_id == $jeep->jeep_id;
-                // Mark jeep as unavailable if already reserved by different reservation
                 $jeep->is_reserved_by_other = $jeep->reserved_for && $jeep->reserved_for != $order->reservation_id;
             }
 
@@ -109,12 +104,11 @@ class TicketingController extends Controller
 
         return view('ticketing.index', compact('orders', 'datesForward', 'sessions', 'jeepSlots'));
     }
-    // Add this to your TicketingController
+
     public function checkNewOrders(Request $request)
     {
         $lastCheck = $request->input('last_check', 0);
 
-        // Count new orders since last check
         $newOrdersCount = DB::table('reservations')
             ->where('created_at', '>', date('Y-m-d H:i:s', $lastCheck))
             ->count();
@@ -125,17 +119,14 @@ class TicketingController extends Controller
         ]);
     }
 
-    /**
-     * Display the invoices page using reservation data with AJAX support
-     */
     public function invoiceIndex(Request $request)
     {
-        $search = $request->input('search');
         $query = DB::table('reservations')
             ->leftJoin('sessions', 'reservations.session_id', '=', 'sessions.id')
             ->select(
                 'reservations.id',
                 'reservations.name',
+                'reservations.city',
                 'reservations.count as passenger_count',
                 'reservations.price',
                 'reservations.payment_status',
@@ -144,28 +135,24 @@ class TicketingController extends Controller
                 'sessions.session_time'
             );
 
-        // Add search functionality if search parameter is provided
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('reservations.id', 'like', "%{$search}%")
-                    ->orWhere('reservations.name', 'like', "%{$search}%")
-                    ->orWhere('reservations.city', 'like', "%{$search}%");
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('reservations.id', 'like', "%{$searchTerm}%")
+                    ->orWhere('reservations.name', 'like', "%{$searchTerm}%")
+                    ->orWhere('reservations.city', 'like', "%{$searchTerm}%");
             });
         }
 
-        // Get paginated results
-        $invoices = $query->orderBy('reservations.id', 'desc')
+        $invoices = $query->orderBy('reservations.created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        // Check if this is an AJAX request
         if ($request->ajax()) {
-            // For AJAX requests, return only the partial view
-            return view('ticketing.invoices.index', compact('invoices'))
-                ->renderSections()['content'];
+            return view('ticketing.invoices.table', compact('invoices'));
         }
 
-        // For regular requests, return the full view
         return view('ticketing.invoices.index', compact('invoices'));
     }
 
@@ -173,7 +160,6 @@ class TicketingController extends Controller
 
     public function savePlotting(Request $request)
     {
-        // Validate the request
         $request->validate([
             'reservation_id' => 'required|exists:reservations,id',
             'selected_jeep' => 'required|exists:jeeps,id',
@@ -186,7 +172,6 @@ class TicketingController extends Controller
         $sessionId = $request->input('session_id');
         $date = $request->input('date');
 
-        // Check if the jeep is already reserved by another reservation for this session and date
         $conflictingReservation = DB::table('reserve_jeep')
             ->join('reservations', 'reserve_jeep.reservation_id', '=', 'reservations.id')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
@@ -200,13 +185,11 @@ class TicketingController extends Controller
             return redirect()->route('ticketing.index')->with('error', 'Jeep sudah direservasi oleh pelanggan lain!');
         }
 
-        // Check if this is a new plotting or an update
         $existingPlotting = DB::table('reserve_jeep')
             ->where('reservation_id', $reservationId)
             ->first();
 
         if ($existingPlotting) {
-            // Update existing plotting
             DB::table('reserve_jeep')
                 ->where('reservation_id', $reservationId)
                 ->update([
@@ -214,7 +197,6 @@ class TicketingController extends Controller
                     'updated_at' => now()
                 ]);
         } else {
-            // Create new plotting
             DB::table('reserve_jeep')->insert([
                 'reservation_id' => $reservationId,
                 'jeep_id' => $jeepId,

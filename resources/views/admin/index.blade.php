@@ -121,7 +121,7 @@
             </div>
         </div>
 
-        <!-- City Distribution Pie Chart -->
+        <!-- Pie Chart -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="p-6 border-b">
                 <h2 class="text-lg font-semibold text-gray-800">Reservations by City</h2>
@@ -145,7 +145,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Fetch city distribution data
+
             fetch('{{ route("admin.api.city-distribution") }}')
                 .then(response => response.json())
                 .then(data => {
@@ -166,7 +166,6 @@
             ctx.id = 'cityPieChart';
             document.getElementById('cityPieChartContainer').appendChild(ctx);
 
-            // Generate colors
             const colors = generateColors(data.length);
 
             new Chart(ctx, {
@@ -208,9 +207,9 @@
         }
 
         function renderTopCitiesList(data) {
-            // Sort data by count in descending order
             const sortedData = [...data].sort((a, b) => b.count - a.count);
-            const topCities = sortedData.slice(0, 5); // Get top 5 cities
+            // 5 kota tertinggi
+            const topCities = sortedData.slice(0, 5); 
             const total = data.reduce((acc, item) => acc + item.count, 0);
 
             const listContainer = document.getElementById('topCitiesList');

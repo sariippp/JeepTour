@@ -44,7 +44,7 @@
                         </div>
                         <div class="relative w-20">
                             <select id="yearSelector" class="w-full appearance-none bg-white border border-gray-300 hover:border-gray-400 px-2 py-1 pr-6 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                <!-- Years will be populated from JS -->
+
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-gray-700">
                                 <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -109,15 +109,12 @@
         const yearSelector = document.getElementById('yearSelector');
         const monthlyRevenueDisplay = document.getElementById('monthlyRevenueDisplay');
         
-        // Set current month
         const currentDate = new Date();
         monthSelector.value = currentDate.getMonth() + 1;
         
-        // Fetch available years from database
         fetch('{{ route('admin.api.available-years') }}')
             .then(response => response.json())
             .then(data => {
-                // Populate year selector with available years
                 const years = data.years;
                 years.forEach(year => {
                     const option = document.createElement('option');
@@ -126,41 +123,33 @@
                     yearSelector.appendChild(option);
                 });
                 
-                // Set current year if available
                 const currentYear = currentDate.getFullYear().toString();
                 if (years.includes(currentYear)) {
                     yearSelector.value = currentYear;
                 } else if (years.length > 0) {
-                    // Set to most recent year if current year not available
                     yearSelector.value = years[0];
                 }
                 
-                // Initial revenue fetch
                 fetchMonthlyRevenue();
             })
             .catch(error => {
                 console.error('Error fetching available years:', error);
-                // Add current year as fallback
                 const option = document.createElement('option');
                 option.value = currentDate.getFullYear();
                 option.textContent = currentDate.getFullYear();
                 yearSelector.appendChild(option);
             });
         
-        // Format number as currency function
         function formatCurrency(amount) {
             return 'Rp. ' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
         }
         
-        // Function to fetch monthly revenue
         function fetchMonthlyRevenue() {
             const month = monthSelector.value;
             const year = yearSelector.value;
-            
-            // Show loading state
+
             monthlyRevenueDisplay.textContent = 'Loading...';
-            
-            // Fetch monthly revenue for selected month and year
+
             fetch(`{{ route('admin.api.monthly-revenue') }}?month=${month}&year=${year}`)
                 .then(response => response.json())
                 .then(data => {
@@ -172,7 +161,6 @@
                 });
         }
         
-        // Handle month and year selection changes
         monthSelector.addEventListener('change', fetchMonthlyRevenue);
         yearSelector.addEventListener('change', fetchMonthlyRevenue);
     });

@@ -43,16 +43,13 @@ class AdminProfileController extends Controller
         $user->email = $request->email;
         $user->telp = $request->telp;
 
-        // Update password if provided and current password is correct
         if ($request->filled('new_password')) {
-            // Verify current password
             if (!Auth::attempt(['id' => $user->id, 'password' => $request->current_password])) {
                 return back()->withErrors([
                     'current_password' => 'The current password is incorrect.'
                 ])->withInput();
             }
 
-            // Hash the new password using the same method as in LoginController
             $user->password = bcrypt($request->new_password);
         }
 

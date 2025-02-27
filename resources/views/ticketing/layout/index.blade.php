@@ -16,13 +16,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <style>
-        /* Base styles */
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f7fa;
         }
         
-        /* Sidebar styles */
         .sidebar {
             transition: all 0.3s;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
@@ -43,13 +41,11 @@
             color: #3b82f6;
         }
         
-        /* Header styles */
         .header {
             background-color: white;
             border-bottom: 1px solid #e5e7eb;
         }
         
-        /* Profile button */
         .profile-button {
             cursor: pointer;
             transition: all 0.2s;
@@ -90,7 +86,6 @@
             background-color: #fef2f2;
         }
         
-        /* Responsive tweaks */
         @media (max-width: 1024px) {
             .sidebar {
                 width: 240px;

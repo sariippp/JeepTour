@@ -157,7 +157,6 @@
         </div>
     </div>
 
-    <!-- Custom styles -->
     <style>
         .avatar-placeholder {
             width: 120px;
@@ -180,7 +179,6 @@
             font-weight: 500;
         }
 
-        /* Additional responsive styles */
         @media (max-width: 767.98px) {
             .avatar-placeholder {
                 width: 100px;

@@ -19,7 +19,6 @@
 
     @foreach($datesForward as $date)
         <div id="date-{{ $date->full_date }}" class="date-section bg-white p-4 md:p-6 rounded-lg border border-gray-200 shadow-sm mb-4">
-            <!-- Date header with count -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-medium">{{ $date->day_group }} {{ $date->month_group }} {{ $date->year_group }}</h2>
             </div>
@@ -180,69 +179,56 @@ $(document).ready(function() {
         const reservationId = $(this).closest('form').find('input[name="reservation_id"]').val();
         const form = $(`#plottingForm${reservationId}`);
         const saveButton = $(`#saveButton${reservationId}`);
-        
-        // If this checkbox is checked, disable all other checkboxes
+
         if ($(this).is(':checked')) {
-            // Disable all other checkboxes
             form.find('.jeep-checkbox').not(this).prop('disabled', true);
-            // Enable the save button
+
             saveButton.prop('disabled', false);
         } else {
-            // Re-enable checkboxes that are not reserved by others and have sufficient capacity or are already selected
             form.find('.jeep-checkbox').each(function() {
                 const slots = parseInt($(this).data('slots'));
                 const requiredPassengers = parseInt($(this).data('required'));
                 const isSelected = $(this).data('is-selected') === 'true';
                 const isDisabledByOther = $(this).closest('.jeep-card').hasClass('border-warning-subtle');
                 
-                // Allow selection of checkboxes that:
-                // 1. Were originally selected for this reservation, OR
-                // 2. Have enough capacity AND are not reserved by others
                 if (isSelected) {
-                    $(this).prop('disabled', false); // Always allow unselecting the originally selected jeep
+                    $(this).prop('disabled', false); 
                 } else {
                     const shouldDisable = (slots < requiredPassengers) || isDisabledByOther;
                     $(this).prop('disabled', shouldDisable);
                 }
             });
             
-            // Disable save button since no jeep is selected
             saveButton.prop('disabled', true);
         }
     });
     
-    // Reset form when modal is closed
     $('.close-modal-btn').on('click', function() {
         const reservationId = $(this).data('reservation-id');
         resetModalForm(reservationId);
     });
     
-    // Also reset form when modal is closed by clicking the X or outside the modal
     $('.modal').on('hidden.bs.modal', function() {
         const reservationId = $(this).find('input[name="reservation_id"]').val();
         resetModalForm(reservationId);
     });
-    
-    // Function to reset the form to its original state
+
     function resetModalForm(reservationId) {
         const form = $(`#plottingForm${reservationId}`);
-        
-        // Reset all checkboxes to their original state
+
         form.find('.jeep-checkbox').each(function() {
             const originalState = $(this).data('original-state');
             const isSelected = $(this).data('is-selected') === 'true';
             const slots = parseInt($(this).data('slots'));
             const requiredPassengers = parseInt($(this).data('required'));
             const isDisabledByOther = $(this).closest('.jeep-card').hasClass('border-warning-subtle');
-            
-            // Reset checkbox to checked state if it was originally selected
+
             if (originalState === 'checked') {
                 $(this).prop('checked', true);
             } else {
                 $(this).prop('checked', false);
             }
-            
-            // Reset disabled state - don't disable originally selected jeeps
+
             if (isSelected) {
                 $(this).prop('disabled', false);
             } else {
@@ -250,30 +236,25 @@ $(document).ready(function() {
                 $(this).prop('disabled', shouldDisable);
             }
         });
-        
-        // Reset save button state
+
         const saveButton = $(`#saveButton${reservationId}`);
         const hasSelectedJeep = form.find('.jeep-checkbox:checked').length > 0;
         saveButton.prop('disabled', !hasSelectedJeep);
     }
-    
-    // Initialize state for pre-selected jeeps
+
     $('.jeep-checkbox:checked').trigger('change');
-    
-    // Date switcher for mobile view
+
     $('#dateSwitcher').on('change', function() {
         const selectedDateId = $(this).val();
         $('.date-section').hide();
         $(`#${selectedDateId}`).show();
     });
-    
-    // Initialize date sections display
+
     if (window.innerWidth < 768) {
         $('.date-section').hide();
         $('.date-section:first').show();
     }
-    
-    // Handle resize events
+
     $(window).resize(function() {
         if (window.innerWidth >= 768) {
             $('.date-section').show();
@@ -286,13 +267,10 @@ $(document).ready(function() {
     
 });
 
-// Improved notification system
 function showNotification(message, type = 'success') {
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    
-    // Create content
+
     notification.innerHTML = `
         <div class="notification-content">
             <span class="notification-icon">
@@ -303,23 +281,18 @@ function showNotification(message, type = 'success') {
         <button class="notification-close"><i class="fas fa-times"></i></button>
         <div class="notification-progress"></div>
     `;
-    
-    // Add to document
+
     document.body.appendChild(notification);
-    
-    // Show notification with animation
+
     setTimeout(() => notification.classList.add('show'), 10);
-    
-    // Add progress animation
+
     const progress = notification.querySelector('.notification-progress');
     progress.style.animation = 'notification-progress 5s linear forwards';
-    
-    // Auto-close after 5 seconds
+
     const timeout = setTimeout(() => {
         closeNotification(notification);
     }, 5000);
-    
-    // Manual close button
+
     const closeBtn = notification.querySelector('.notification-close');
     closeBtn.addEventListener('click', () => {
         clearTimeout(timeout);
@@ -327,18 +300,14 @@ function showNotification(message, type = 'success') {
     });
 }
 
-// Update the close-modal-btn click handler to refresh the page
 $('.close-modal-btn').on('click', function() {
     const reservationId = $(this).data('reservation-id');
-    // First reset the form to its original state
     resetModalForm(reservationId);
-    // Then reload the page after the modal is fully hidden
     $('#jeepPlotModal' + reservationId).on('hidden.bs.modal', function() {
         location.reload();
     });
 });
 
-// Also update the modal hidden event handler to refresh when closed by clicking X or outside
 $('.modal').on('hidden.bs.modal', function() {
     location.reload();
 });
@@ -346,8 +315,7 @@ $('.modal').on('hidden.bs.modal', function() {
 function closeNotification(notification) {
     notification.classList.remove('show');
     notification.classList.add('hide');
-    
-    // Remove from DOM after animation completes
+
     setTimeout(() => {
         if (notification.parentNode) {
             notification.parentNode.removeChild(notification);
@@ -355,7 +323,6 @@ function closeNotification(notification) {
     }, 300);
 }
 
-// Replace alert calls with this function
 window.addEventListener('load', function() {
     @if(session('success'))
         showNotification("{{ session('success') }}");
@@ -366,7 +333,6 @@ window.addEventListener('load', function() {
     @endif
 });
 
-// Improved new orders notification system
 function checkForNewOrders() {
     const lastCheck = localStorage.getItem('lastOrderCheck') || '0';
     
@@ -378,13 +344,11 @@ function checkForNewOrders() {
         },
         success: function(response) {
             if (response.new_orders > 0) {
-                // Remove any existing notification before showing a new one
                 const existingNotification = document.querySelector('.new-orders-notification');
                 if (existingNotification) {
                     existingNotification.remove();
                 }
-                
-                // Show notification bar
+
                 const notification = document.createElement('div');
                 notification.className = 'new-orders-notification';
                 notification.innerHTML = `
@@ -396,19 +360,16 @@ function checkForNewOrders() {
                 `;
                 
                 document.body.insertBefore(notification, document.body.firstChild);
-                
-                // Play sound alert (optional)
+
                 const audio = new Audio('/audio/notification.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(e => console.log('Audio play failed: Browser requires user interaction before playing audio'));
-                
-                // Handle close button
+
                 notification.querySelector('.close-notification').addEventListener('click', function() {
                     notification.remove();
                 });
             }
-            
-            // Always update the last check time regardless of new orders
+
             localStorage.setItem('lastOrderCheck', response.current_time);
         },
         error: function(xhr, status, error) {
@@ -417,18 +378,14 @@ function checkForNewOrders() {
     });
 }
 
-// Check for new orders every 15 seconds (more frequent than before)
 setInterval(checkForNewOrders, 15000);
 
-// Initial check on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Small delay to ensure everything is loaded
     setTimeout(checkForNewOrders, 1000);
 });
 </script>
 
 <style>
-/* Base styles */
 body {
     background-color: #f5f7fa;
     color: #333;
@@ -441,7 +398,6 @@ body {
     padding: 0 1rem;
 }
 
-/* New Orders Notification */
 .new-orders-notification {
     position: fixed;
     top: 0;
@@ -501,7 +457,6 @@ body {
     to { transform: translateY(0); }
 }
 
-/* Regular Notifications */
 .notification {
     position: fixed;
     bottom: 20px;
@@ -608,7 +563,6 @@ body {
     animation: notification-progress 5s linear forwards;
 }
 
-/* Button Styling */
 .btn-primary {
     background-color: #2563eb !important;
     border-color: #2563eb !important;
@@ -637,7 +591,6 @@ body {
     cursor: not-allowed;
 }
 
-/* Modal styling */
 .modal-content {
     border: none;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -651,7 +604,6 @@ body {
     border-top: 1px solid #f0f0f0;
 }
 
-/* Jeep cards */
 .jeep-card {
     transition: all 0.2s ease;
 }
@@ -665,7 +617,6 @@ body {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
 }
 
-/* Responsive styles */
 @media (max-width: 767px) {
     .notification {
         min-width: unset;
@@ -700,7 +651,6 @@ body {
     }
 }
 
-/* Extra enhancements */
 .bg-blue-50 {
     background-color: #eff6ff;
 }

@@ -33,7 +33,7 @@ class AdminController extends Controller
         return view('admin.index', compact('totalPengunjung', 'totalPendapatan', 'recentOrders'));
     }
 
-    // Users Methods
+    // Users
     public function showUsers()
     {
         $loggedInUserId = Auth::id();
@@ -114,7 +114,7 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'User berhasil dihapus');
     }
 
-    // Financial Management Methods
+    // Financial Management
     public function financialDashboard()
     {
         $stats = $this->getFinancialStats();
@@ -261,7 +261,7 @@ class AdminController extends Controller
         return view('admin.financial.report', compact('report'));
     }
 
-    // Jeep Management Methods
+    // Jeep Management
     public function jeepManagement()
     {
         $currentMonth = date('Y-m');
@@ -366,16 +366,13 @@ class AdminController extends Controller
 
     public function getCityDistribution()
     {
-        // Get all reservations, group by city (case insensitive), and count
         $cityDistribution = DB::table('reservations')
             ->select(DB::raw('LOWER(city) as city_lower, city, SUM(count) as count'))
             ->groupBy('city_lower', 'city')
             ->orderBy('count', 'desc')
             ->get();
 
-        // Format the data for the chart
         $formattedData = $cityDistribution->map(function ($item) {
-            // Use the original city name for display (with proper case)
             return [
                 'city' => $item->city,
                 'count' => (int) $item->count
@@ -390,7 +387,6 @@ class AdminController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
-        // Calculate the monthly revenue
         $revenue = DB::table('reservations')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
             ->whereYear('sessions.date', $year)
@@ -403,10 +399,8 @@ class AdminController extends Controller
 
     public function getAvailableYears()
     {
-        // Get all years for which we have session data using raw SQL query
         $years = DB::select('SELECT DISTINCT YEAR(date) as year FROM sessions ORDER BY year DESC');
 
-        // Convert the result to a simple array of year strings
         $yearArray = collect($years)->map(function ($item) {
             return (string) $item->year;
         })->toArray();
