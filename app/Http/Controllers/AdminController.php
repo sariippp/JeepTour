@@ -45,14 +45,65 @@ class AdminController extends Controller
         return view('admin.user.index', compact('groupedUsers'));
     }
 
-    public function updateUser(Request $request, $id)
+    public function storeUser(Request $request)
     {
-        $user = User::findOrFail($id);
-        $user->name = $request->input('name');
-        // $user->email = $request->input('email');
-        $user->save();
+        try {
+            $validated = $request->validate([
+                'username' => 'required|string|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users',
+                'telp' => 'required|string|max:255',
+                'role' => 'required|in:admin,ticketing',
+            ]);
 
-        return redirect()->route('admin.users')->with('success', 'User berhasil diperbarui');
+            $user = new User();
+            $user->username = $validated['username'];
+            $user->password = bcrypt($validated['password']); // Encrypting password
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->telp = $validated['telp'];
+            $user->role = $validated['role'];
+            $user->created_at = now();
+            $user->updated_at = now();
+
+            $success = $user->save();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                if ($success) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'User created successfully',
+                        'user' => $user
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to create user'
+                    ], 500);
+                }
+            }
+
+            if ($success) {
+                return redirect()->route('admin.users')->with('success', 'User created successfully');
+            } else {
+                return redirect()->route('admin.users')->with('error', 'Failed to create user');
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('User creation error: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating user: ' . $e->getMessage()
+                ], 422);
+            }
+
+            return redirect()->route('admin.users')
+                ->with('error', 'Error creating user: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function deleteUser($id)
@@ -311,6 +362,56 @@ class AdminController extends Controller
         $jeep->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function getCityDistribution()
+    {
+        // Get all reservations, group by city (case insensitive), and count
+        $cityDistribution = DB::table('reservations')
+            ->select(DB::raw('LOWER(city) as city_lower, city, SUM(count) as count'))
+            ->groupBy('city_lower', 'city')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        // Format the data for the chart
+        $formattedData = $cityDistribution->map(function ($item) {
+            // Use the original city name for display (with proper case)
+            return [
+                'city' => $item->city,
+                'count' => (int) $item->count
+            ];
+        });
+
+        return response()->json($formattedData);
+    }
+
+    public function getMonthlyRevenue(Request $request)
+    {
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        // Calculate the monthly revenue
+        $revenue = DB::table('reservations')
+            ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
+            ->whereYear('sessions.date', $year)
+            ->whereMonth('sessions.date', $month)
+            ->where('reservations.payment_status', 'paid')
+            ->sum(DB::raw('reservations.price * reservations.count'));
+
+        return response()->json(['revenue' => $revenue]);
+    }
+
+    public function getAvailableYears()
+    {
+        // Get all years for which we have session data using raw SQL query
+        $years = DB::select('SELECT DISTINCT YEAR(date) as year FROM sessions ORDER BY year DESC');
+
+        // Convert the result to a simple array of year strings
+        $yearArray = collect($years)->map(function ($item) {
+            return (string) $item->year;
+        })->toArray();
+
+        return response()->json(['years' => $yearArray]);
     }
 
     public function deleteJeep($id)

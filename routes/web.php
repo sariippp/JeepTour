@@ -18,9 +18,13 @@ Route::group(
     function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
 
+        Route::get('/admin/api/city-distribution', [AdminController::class, 'getCityDistribution'])
+            ->name('api.city-distribution');
+
         Route::get('/users', [AdminController::class, 'showUsers'])->name('users');
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
         Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
 
         Route::get('/profile', [AdminProfileController::class, 'profile'])->name('profile');
         Route::post('/profile/update', [AdminProfileController::class, 'updateProfile'])->name('profile.update');
@@ -29,6 +33,10 @@ Route::group(
         Route::get('/financial/invoices', [AdminController::class, 'invoiceIndex'])->name('financial.invoices');
         Route::post('/financial/report', [AdminController::class, 'generateFinancialReport'])->name('financial.report');
         Route::get('/financial/invoices/export', [AdminController::class, 'exportToExcel'])->name('invoices.export');
+        Route::get('/admin/api/monthly-revenue', [App\Http\Controllers\AdminController::class, 'getMonthlyRevenue'])
+            ->name('api.monthly-revenue');
+        Route::get('/admin/api/available-years', [App\Http\Controllers\AdminController::class, 'getAvailableYears'])
+            ->name('api.available-years');
 
         Route::get('/jeeps', [AdminController::class, 'jeepManagement'])->name('jeeps');
         Route::post('/jeeps/owners', [AdminController::class, 'storeOwner'])->name('jeeps.owners.store');

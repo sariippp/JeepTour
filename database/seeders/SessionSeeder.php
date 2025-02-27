@@ -36,7 +36,7 @@ class SessionSeeder extends Seeder
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-03-02',
+            'date' => '2025-03-27',
             'session_time' => '10:00',
             'passenger_count' => 24,
         ]);
@@ -45,5 +45,6 @@ class SessionSeeder extends Seeder
             'session_time' => '11:00',
             'passenger_count' => 24,
         ]);
+
     }
 }
