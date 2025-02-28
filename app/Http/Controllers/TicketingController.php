@@ -140,8 +140,7 @@ class TicketingController extends Controller
 
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('reservations.id', 'like', "%{$searchTerm}%")
-                    ->orWhere('reservations.name', 'like', "%{$searchTerm}%")
-                    ->orWhere('reservations.city', 'like', "%{$searchTerm}%");
+                    ->orWhere('reservations.name', 'like', "%{$searchTerm}%");
             });
         }
 

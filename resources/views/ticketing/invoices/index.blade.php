@@ -7,11 +7,20 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold">Order Log</h1>
             <div class="flex gap-4">
-                <div class="relative">
-                    <input type="text" placeholder="Search by ID or name..."
-                        class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        id="searchInput" value="{{ request('search') }}">
-                </div>
+                <form action="{{ route('ticketing.invoices') }}" method="GET" class="w-full">
+                    <div class="relative">
+                        <input type="text" name="search" placeholder="Search by ID or name..."
+                            class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            id="searchInput" value="{{ request('search') }}">
+                        <button type="submit" class="absolute inset-y-0 right-0 px-4 text-gray-500 hover:text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -131,10 +140,16 @@
 
 @push('scripts')
     <script>
-        document.getElementById('searchInput').addEventListener('keyup', function (e) {
-            if (e.key === 'Enter') {
-                const searchTerm = e.target.value.trim();
-                window.location.href = '{{ route("ticketing.invoices") }}?search=' + encodeURIComponent(searchTerm);
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function (e) {
+                    if (e.key === 'Enter') {
+                        const searchTerm = e.target.value.trim();
+                        window.location.href = '{{ route("ticketing.invoices") }}?search=' + encodeURIComponent(searchTerm);
+                    }
+                });
             }
         });
     </script>
