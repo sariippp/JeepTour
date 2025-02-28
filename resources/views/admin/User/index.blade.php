@@ -1,13 +1,13 @@
 @extends('admin.layout.index')
 
-@section('title', 'Users')
+@section('title', 'Pengguna')
 
 @section('content')
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>User Management</h2>
+            <h2>Manajemen Pengguna</h2>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                <i class="bi bi-plus-circle"></i> New User
+                <i class="bi bi-plus-circle"></i> Pengguna Baru
             </button>
         </div>
 
@@ -55,8 +55,8 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
-                                            Delete
+                                            onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">
+                                            Hapus
                                         </button>
                                     </form>
                                 </div>
@@ -76,7 +76,7 @@
                 <form id="createUserForm" method="POST" action="{{ route('admin.users.store') }}">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="createUserModalLabel">Create New User</h5>
+                        <h5 class="modal-title" id="createUserModalLabel">Buat Pengguna Baru</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -86,15 +86,14 @@
                             <input type="text" class="form-control" id="username" name="username" required>
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="password" class="form-label">Kata Sandi</label>
                             <input type="password" class="form-control" id="password" name="password" minlength="6"
                                 required>
-                            <div class="form-text text-muted">Password must be at least 6 characters long</div>
-                            <div id="passwordError" class="invalid-feedback">Password must be at least 6 characters long
-                            </div>
+                            <div class="form-text text-muted">Kata sandi harus minimal 6 karakter</div>
+                            <div id="passwordError" class="invalid-feedback">Kata sandi harus minimal 6 karakter</div>
                         </div>
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
+                            <label for="name" class="form-label">Nama</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="mb-3">
@@ -102,21 +101,21 @@
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
                         <div class="mb-3">
-                            <label for="telp" class="form-label">Phone Number</label>
+                            <label for="telp" class="form-label">Nomor Telepon</label>
                             <input type="text" class="form-control" id="telp" name="telp" required>
                         </div>
                         <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
+                            <label for="role" class="form-label">Peran</label>
                             <select class="form-select" id="role" name="role" required>
-                                <option value="">Select Role</option>
+                                <option value="">Pilih Peran</option>
                                 <option value="admin">Admin</option>
                                 <option value="ticketing">Ticketing</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Save User</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan Pengguna</button>
                     </div>
                 </form>
             </div>
@@ -156,7 +155,7 @@
                         const alertContainer = document.createElement('div');
                         alertContainer.className = 'alert alert-danger alert-dismissible fade show';
                         alertContainer.innerHTML = `
-                            Password must be at least 6 characters long
+                            Kata sandi harus minimal 6 karakter
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
                         document.getElementById('modalAlerts').appendChild(alertContainer);
@@ -167,7 +166,7 @@
                     const formData = new FormData(createUserForm);
                     const submitButton = createUserForm.querySelector('button[type="submit"]');
                     const originalButtonText = submitButton.innerHTML;
-                    submitButton.innerHTML = 'Saving...';
+                    submitButton.innerHTML = 'Menyimpan...';
                     submitButton.disabled = true;
 
                     let isValid = true;
@@ -184,7 +183,7 @@
                         const alertContainer = document.createElement('div');
                         alertContainer.className = 'alert alert-danger alert-dismissible fade show';
                         alertContainer.innerHTML = `
-                            Please fill in all required fields
+                            Silakan isi semua bidang yang diperlukan
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
                         document.getElementById('modalAlerts').appendChild(alertContainer);
@@ -203,7 +202,7 @@
                         .then(response => {
                             if (!response.ok) {
                                 return response.json().then(data => {
-                                    throw new Error(data.message || 'Server error occurred');
+                                    throw new Error(data.message || 'Terjadi kesalahan server');
                                 });
                             }
                             return response.json();
@@ -214,7 +213,7 @@
                             const alertContainer = document.createElement('div');
                             alertContainer.className = 'alert alert-success alert-dismissible fade show';
                             alertContainer.innerHTML = `
-                            User created successfully!
+                            Pengguna berhasil dibuat!
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
                             document.querySelector('.container').prepend(alertContainer);
@@ -234,7 +233,7 @@
                             const alertContainer = document.createElement('div');
                             alertContainer.className = 'alert alert-danger alert-dismissible fade show';
                             alertContainer.innerHTML = `
-                            Error: ${error.message || 'Failed to create user'}
+                            Error: ${error.message || 'Gagal membuat pengguna'}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
                             document.querySelector('#modalAlerts').innerHTML = '';

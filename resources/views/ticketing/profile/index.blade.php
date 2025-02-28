@@ -6,7 +6,7 @@
             <div class="col-md-10">
                 <!-- Page Title -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="font-weight-bold mb-0">Profile</h2>
+                    <h2 class="font-weight-bold mb-0">Profil</h2>
                 </div>
 
                 <!-- Flash Messages -->
@@ -31,7 +31,7 @@
                 <!-- Profile Card -->
                 <div class="card shadow-sm border-0 rounded-lg overflow-hidden">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">User Information</h5>
+                        <h5 class="mb-0">Informasi Pengguna</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('ticketing.profile.update') }}">
@@ -45,7 +45,7 @@
                                             <span class="avatar-text">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
                                         </div>
                                         <h5>{{ $user->name }}</h5>
-                                        <p class="text-muted">{{ $user->username }}</p>
+                                        <p class="text-muted">{{ strtoupper($user->role) }}</p>
                                     </div>
                                 </div>
 
@@ -55,7 +55,7 @@
                                         <!-- Name -->
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="name" class="form-label">Full Name</label>
+                                                <label for="name" class="form-label">Nama Lengkap</label>
                                                 <input type="text" class="form-control" id="name" name="name"
                                                     value="{{ old('name', $user->name) }}" required>
                                             </div>
@@ -82,7 +82,7 @@
                                         <!-- Phone -->
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="telp" class="form-label">Phone Number</label>
+                                                <label for="telp" class="form-label">Nomor Telepon</label>
                                                 <input type="text" class="form-control" id="telp" name="telp"
                                                     value="{{ old('telp', $user->telp) }}" required>
                                             </div>
@@ -91,15 +91,16 @@
                                         <!-- Divider -->
                                         <div class="col-12">
                                             <hr class="my-3">
-                                            <h5>Change Password</h5>
-                                            <p class="text-muted small">Enter your current password and new password to
-                                                update</p>
+                                            <h5>Ubah Kata Sandi</h5>
+                                            <p class="text-muted small">Masukkan kata sandi saat ini dan kata sandi baru
+                                                untuk
+                                                memperbarui</p>
                                         </div>
 
                                         <!-- Current Password -->
                                         <div class="col-md-12">
                                             <div class="form-group mb-3">
-                                                <label for="current_password" class="form-label">Current Password</label>
+                                                <label for="current_password" class="form-label">Kata Sandi Saat Ini</label>
                                                 <div class="input-group">
                                                     <input type="password" class="form-control" id="current_password"
                                                         name="current_password">
@@ -116,7 +117,7 @@
                                         <!-- New Password -->
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="new_password" class="form-label">New Password</label>
+                                                <label for="new_password" class="form-label">Kata Sandi Baru</label>
                                                 <div class="input-group">
                                                     <input type="password" class="form-control" id="new_password"
                                                         name="new_password">
@@ -130,8 +131,9 @@
                                         <!-- Confirm New Password -->
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="new_password_confirmation" class="form-label">Confirm New
-                                                    Password</label>
+                                                <label for="new_password_confirmation" class="form-label">Konfirmasi Kata
+                                                    Sandi
+                                                    Baru</label>
                                                 <div class="input-group">
                                                     <input type="password" class="form-control"
                                                         id="new_password_confirmation" name="new_password_confirmation">
@@ -148,7 +150,7 @@
                             <!-- Buttons -->
                             <div class="d-flex justify-content-end mt-4">
                                 <button type="reset" class="btn btn-outline-secondary me-2">Reset</button>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
                             </div>
                         </form>
                     </div>

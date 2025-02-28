@@ -26,15 +26,8 @@
                 text-gray-800
                 mb-2
             ">
-                Welcome Back
+                Selamat Datang Kembali
             </h1>
-            <p class="
-                text-center
-                text-gray-500
-                mb-6
-            ">
-                Please sign in to continue
-            </p>
 
             {{-- Error Messages --}}
             @if ($errors->any())
@@ -86,7 +79,7 @@
                             placeholder-gray-400
                             outline-none
                         "
-                        placeholder="Enter your username"
+                        placeholder="Masukkan Username"
                         required
                         autofocus
                     >
@@ -122,7 +115,7 @@
                             placeholder-gray-400
                             outline-none
                         "
-                        placeholder="Enter your password"
+                        placeholder="Masukkan kata sandi"
                         required
                     >
                     @error('password')
@@ -148,7 +141,7 @@
                         for="remember"
                         class="ml-2 text-sm text-gray-600"
                     >
-                        Remember me
+                        Ingat saya
                     </label>
                 </div>
 

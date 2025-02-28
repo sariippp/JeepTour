@@ -107,7 +107,7 @@
             <div class="h-full w-64 bg-white border-r border-gray-200">
                 <!-- Logo -->
                 <div class="flex items-center justify-between p-4 border-b">
-                    <h1 class="text-xl font-semibold text-gray-800">Ticketing Panel</h1>
+                    <h1 class="text-xl font-semibold text-gray-800">Ticketing</h1>
                     <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-md hover:bg-gray-100">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -121,17 +121,17 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
-                    <span>Dashboard</span>
+                    <span>Dasbor</span>
                 </a>
                     <a href="{{ route('ticketing.invoices') }}" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link {{ request()->routeIs('ticketing.invoices') ? 'active' : '' }}">
                         <i class="fas fa-file-invoice w-5 h-5"></i>
-                        <span>Order Log</span>
+                        <span>Catatan Pesanan</span>
                     </a>
                     <a href="{{ route('ticketing.profile') }}" class="flex items-center space-x-3 p-3 rounded-lg sidebar-link {{ request()->routeIs('ticketing.profile') ? 'active' : '' }}">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
-    <span>My Profile</span>
+    <span>Profil Saya</span>
 </a>
                     <div class="pt-4">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -160,7 +160,7 @@
                     </div>
                     <div class="flex items-center space-x-3">
                         <div class="welcome-text">
-                            Welcome, <span class="font-medium">{{ Auth::user()->name }}</span>
+                            Selamat Datang, <span class="font-medium">{{ Auth::user()->name }}</span>
                         </div>
                         <a href="{{ route('ticketing.profile') }}" class="profile-button" title="My Profile">
     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

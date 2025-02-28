@@ -37,6 +37,7 @@ Route::group(
             ->name('api.monthly-revenue');
         Route::get('/admin/api/available-years', [AdminController::class, 'getAvailableYears'])
             ->name('api.available-years');
+        Route::get('/admin/api/income-data', [AdminController::class, 'getIncomeData'])->name('api.income-data');
 
         Route::get('/jeeps', [AdminController::class, 'jeepManagement'])->name('jeeps');
         Route::post('/jeeps/owners', [AdminController::class, 'storeOwner'])->name('jeeps.owners.store');

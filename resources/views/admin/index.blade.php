@@ -1,6 +1,6 @@
 @extends('admin.layout.index')
 
-@section('title', 'Dashboard')
+@section('title', 'Dasbor')
 
 @section('content')
     <div class="space-y-8">
@@ -45,10 +45,10 @@
         <!-- Recent Orders -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="flex items-center justify-between p-6 border-b">
-                <h2 class="text-lg font-semibold text-gray-800">Recent Orders</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Pesanan Terbaru</h2>
                 <a href="{{ route('admin.financial.invoices') }}"
                     class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                    View All
+                    Lihat Semua
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -62,14 +62,15 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Customer</th>
+                                    Pelanggan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Location</th>
+                                    Kota</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Passengers</th>
+                                    Jumlah Penumpang</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Amount</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
+                                    Pembayaran</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tanggal
                                 </th>
                             </tr>
                         </thead>
@@ -115,7 +116,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p>No recent orders found.</p>
+                        <p>Tidak ada pesanan terbaru ditemukan.</p>
                     </div>
                 @endif
             </div>
@@ -124,14 +125,14 @@
         <!-- Pie Chart -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="p-6 border-b">
-                <h2 class="text-lg font-semibold text-gray-800">Reservations by City</h2>
+                <h2 class="text-lg font-semibold text-gray-800">Reservasi berdasarkan Kota</h2>
             </div>
             <div class="p-6">
                 <div class="flex flex-col md:flex-row">
                     <div class="w-full md:w-2/3" id="cityPieChartContainer" style="height: 400px;"></div>
                     <div class="w-full md:w-1/3 mt-4 md:mt-0">
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Top Cities</h3>
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Kota Teratas</h3>
                             <div id="topCitiesList" class="space-y-2"></div>
                         </div>
                     </div>
@@ -156,7 +157,7 @@
                     console.error('Error fetching city distribution data:', error);
                     document.getElementById('cityPieChartContainer').innerHTML =
                         '<div class="flex items-center justify-center h-full">' +
-                        '<p class="text-gray-500">Failed to load city distribution data.</p>' +
+                        '<p class="text-gray-500">Gagal memuat data distribusi kota.</p>' +
                         '</div>';
                 });
         });
@@ -197,7 +198,7 @@
                                     const value = context.raw || 0;
                                     const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
                                     const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} people (${percentage}%)`;
+                                    return `${label}: ${value} orang (${percentage}%)`;
                                 }
                             }
                         }
@@ -209,7 +210,7 @@
         function renderTopCitiesList(data) {
             const sortedData = [...data].sort((a, b) => b.count - a.count);
             // 5 kota tertinggi
-            const topCities = sortedData.slice(0, 5); 
+            const topCities = sortedData.slice(0, 5);
             const total = data.reduce((acc, item) => acc + item.count, 0);
 
             const listContainer = document.getElementById('topCitiesList');
@@ -220,12 +221,12 @@
                 const cityItem = document.createElement('div');
                 cityItem.classList.add('flex', 'items-center', 'justify-between');
                 cityItem.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="inline-flex items-center justify-center w-5 h-5 mr-2 text-xs font-medium rounded-full bg-gray-200 text-gray-700">${index + 1}</span>
-                        <span class="text-sm font-medium text-gray-700">${item.city}</span>
-                    </div>
-                    <div class="text-sm text-gray-500">${item.count} (${percentage}%)</div>
-                `;
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center justify-center w-5 h-5 mr-2 text-xs font-medium rounded-full bg-gray-200 text-gray-700">${index + 1}</span>
+                            <span class="text-sm font-medium text-gray-700">${item.city}</span>
+                        </div>
+                        <div class="text-sm text-gray-500">${item.count} (${percentage}%)</div>
+                    `;
 
                 listContainer.appendChild(cityItem);
             });

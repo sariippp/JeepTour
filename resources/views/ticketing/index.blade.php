@@ -1,6 +1,6 @@
 @extends('ticketing.layout.index')
 
-@section('title', 'Dashboard')
+@section('title', 'Dasbor')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
@@ -52,7 +52,7 @@
                                                             <span class="mx-2 text-gray-300">|</span>
                                                             <span class="text-sm text-gray-600"><i class="fas fa-users mr-1 text-blue-500"></i>{{ $order->passenger_count }}</span>
                                                         </div>
-                                                        <p class="font-medium text-gray-600">Order ID: {{ $order->reservation_id }}</p>
+                                                        <p class="font-medium text-gray-600">ID Pesanan: {{ $order->reservation_id }}</p>
                                                     </div>
                                                     
                                                     <div class="w-full md:w-auto flex items-center">
@@ -62,7 +62,7 @@
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#jeepPlotModal{{ $order->reservation_id }}">
                                                             @if($order->is_plotted)
-                                                                <i class="fas fa-check-circle mr-1"></i> Plotted
+                                                                <i class="fas fa-check-circle mr-1"></i> Sudah Diplot
                                                             @else
                                                                 <i class="fas fa-car mr-1"></i> Plot Jeep
                                                             @endif
@@ -79,7 +79,7 @@
                                                 <div class="modal-content rounded-lg border-0 shadow-lg">
                                                     <div class="modal-header bg-gray-50 rounded-t-lg">
                                                         <h1 class="modal-title fs-5 font-medium" id="jeepPlotModalLabel{{ $order->reservation_id }}">
-                                                            Plot Jeep for Reservation #{{ $order->reservation_id }}
+                                                            Plot Jeep untuk Pesanan #{{ $order->reservation_id }}
                                                         </h1>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
@@ -94,15 +94,15 @@
                                                         <div class="modal-body">
                                                             <div class="bg-blue-50 p-4 rounded-md mb-4">
                                                                 <div class="flex items-center justify-between mb-2">
-                                                                    <span class="text-gray-600">Customer:</span>
+                                                                    <span class="text-gray-600">Nama Pelanggan:</span>
                                                                     <span class="font-medium">{{ $order->name }}</span>
                                                                 </div>
                                                                 <div class="flex items-center justify-between mb-2">
-                                                                    <span class="text-gray-600">Location:</span>
+                                                                    <span class="text-gray-600">Kota Asal:</span>
                                                                     <span>{{ $order->city }}</span>
                                                                 </div>
                                                                 <div class="flex items-center justify-between mb-2">
-                                                                    <span class="text-gray-600">Passengers:</span>
+                                                                    <span class="text-gray-600">Jumlah Penumpang:</span>
                                                                     <span class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{{ $order->passenger_count }}</span>
                                                                 </div>
                                                                 <div class="text-center mt-2 p-2 bg-white rounded-md border border-gray-200">
@@ -111,7 +111,7 @@
                                                             </div>
                                                             
                                                             <div class="mb-4">
-                                                                <h5 class="font-medium mb-2">Select Jeep</h5>
+                                                                <h5 class="font-medium mb-2">Pilih Jeep</h5>
                                                                 <p class="text-muted small mb-2">Pilih jeep untuk penumpang (perlu total: {{ $order->passenger_count }})</p>
                                                                 <div class="jeep-options">
                                                                     @foreach ($jeepSlots[$order->reservation_id] ?? [] as $jeep)
@@ -140,10 +140,10 @@
                                                                                         </label>
                                                                                     </div>
                                                                                     @if ($jeep->is_reserved_by_other)
-                                                                                        <span class="badge bg-warning">Reserved by another</span>
+                                                                                        <span class="badge bg-warning">Direservasi oleh yang lain</span>
                                                                                     @else
                                                                                         <span class="badge {{ $jeep->slots_left < $order->passenger_count && !$jeep->is_selected ? 'bg-danger' : 'bg-success' }}">
-                                                                                            {{ $jeep->slots_left }} seat{{ $jeep->slots_left != 1 ? 's' : '' }} left
+                                                                                            {{ $jeep->slots_left }} kursi tersisa
                                                                                         </span>
                                                                                     @endif
                                                                                 </div>
@@ -154,8 +154,8 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer bg-gray-50 rounded-b-lg">
-                                                            <button type="button" class="btn btn-secondary close-modal-btn bg-gray-200 hover:bg-gray-300 text-gray-800 border-0 py-2 px-4 rounded-md" data-bs-dismiss="modal" data-reservation-id="{{ $order->reservation_id }}">Cancel</button>
-                                                            <button type="submit" id="saveButton{{ $order->reservation_id }}" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md" {{ !$order->is_plotted ? 'disabled' : '' }}>Save changes</button>
+                                                            <button type="button" class="btn btn-secondary close-modal-btn bg-gray-200 hover:bg-gray-300 text-gray-800 border-0 py-2 px-4 rounded-md" data-bs-dismiss="modal" data-reservation-id="{{ $order->reservation_id }}">Batal</button>
+                                                            <button type="submit" id="saveButton{{ $order->reservation_id }}" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md" {{ !$order->is_plotted ? 'disabled' : '' }}>Simpan Perubahan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -353,8 +353,8 @@ function checkForNewOrders() {
                 notification.className = 'new-orders-notification';
                 notification.innerHTML = `
                     <div class="container">
-                        <span><i class="fas fa-bell me-2"></i> ${response.new_orders} new order${response.new_orders > 1 ? 's' : ''} received!</span>
-                        <a href="javascript:location.reload()" class="refresh-link">Refresh to view</a>
+                        <span><i class="fas fa-bell me-2"></i> ${response.new_orders} pesanan baru diterima!</span>
+                        <a href="javascript:location.reload()" class="refresh-link">Segarkan untuk melihat</a>
                         <button class="close-notification"><i class="fas fa-times"></i></button>
                     </div>
                 `;

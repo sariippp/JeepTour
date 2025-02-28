@@ -178,6 +178,120 @@ class AdminController extends Controller
         }, 'reservations.xlsx');
     }
 
+    public function getIncomeData(Request $request)
+    {
+        $months = $request->input('months', 3); // Default to 3 months
+
+        // Get the end date (current month)
+        $endDate = Carbon::now();
+
+        // Get the start date (X months ago)
+        $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
+
+        // Query the database for monthly income
+        $monthlyData = DB::table('reservations')
+            ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
+            ->where('reservations.payment_status', 'paid')
+            ->whereBetween('sessions.date', [$startDate, $endDate])
+            ->select(
+                DB::raw('YEAR(sessions.date) as year'),
+                DB::raw('MONTH(sessions.date) as month'),
+                DB::raw('SUM(reservations.price * reservations.count) as revenue')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        // Format the data for the chart
+        $formattedData = [];
+
+        // Create a collection of all months in the range
+        $period = new \DatePeriod(
+            $startDate,
+            new \DateInterval('P1M'),
+            $endDate
+        );
+
+        // Indonesian month names
+        $indonesianMonths = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        // Initialize the array with all months in the range (including those with zero revenue)
+        foreach ($period as $date) {
+            $year = $date->format('Y');
+            $month = (int) $date->format('m');
+
+            $formattedData[] = [
+                'month' => $indonesianMonths[$month] . ' ' . $year,
+                'revenue' => 0,
+                'year' => $year,
+                'month_num' => $month
+            ];
+        }
+
+        // Add the current month if not already included
+        $currentYear = $endDate->format('Y');
+        $currentMonth = (int) $endDate->format('m');
+        $currentMonthIncluded = false;
+
+        foreach ($formattedData as $data) {
+            if ($data['year'] == $currentYear && $data['month_num'] == $currentMonth) {
+                $currentMonthIncluded = true;
+                break;
+            }
+        }
+
+        if (!$currentMonthIncluded) {
+            $formattedData[] = [
+                'month' => $indonesianMonths[$currentMonth] . ' ' . $currentYear,
+                'revenue' => 0,
+                'year' => $currentYear,
+                'month_num' => $currentMonth
+            ];
+        }
+
+        // Fill in the actual revenue data
+        foreach ($monthlyData as $data) {
+            foreach ($formattedData as &$item) {
+                if ($item['year'] == $data->year && $item['month_num'] == $data->month) {
+                    $item['revenue'] = (float) $data->revenue;
+                    break;
+                }
+            }
+        }
+
+        // Sort by year and month
+        usort($formattedData, function ($a, $b) {
+            if ($a['year'] !== $b['year']) {
+                return $a['year'] <=> $b['year'];
+            }
+            return $a['month_num'] <=> $b['month_num'];
+        });
+
+        // Remove helper fields not needed for the chart
+        $formattedData = array_map(function ($item) {
+            return [
+                'month' => $item['month'],
+                'revenue' => $item['revenue']
+            ];
+        }, $formattedData);
+
+        return response()->json($formattedData);
+    }
+
     public function invoiceIndex(Request $request)
     {
         $query = Reservation::with('session');

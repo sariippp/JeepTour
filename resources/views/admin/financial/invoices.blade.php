@@ -1,19 +1,19 @@
 @extends('admin.layout.index')
 
-@section('title', 'Orders')
+@section('title', 'Pesanan')
 
 @section('content')
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Orders</h1>
+            <h1 class="text-2xl font-bold">Pesanan</h1>
             <div class="flex gap-4">
                 <div class="relative">
-                    <input type="text" placeholder="Search by ID or name..."
-                        class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input type="text" placeholder="Cari berdasarkan ID atau nama..."
+                        class="w-80 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         id="searchInput" value="{{ request('search') }}">
                 </div>
                 <a href="{{ route('admin.invoices.export') }}" class="bg-green-500 text-white px-4 py-2 rounded">
-                    Export to Excel
+                    Unduh Excel
                 </a>
             </div>
         </div>
@@ -21,17 +21,17 @@
         {{-- Summary Cards --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
+                <h3 class="text-sm font-medium text-gray-500">Total Pesanan</h3>
                 <p class="text-2xl font-bold">{{ $reservations->total() }}</p>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-sm font-medium text-gray-500">Paid Orders</h3>
+                <h3 class="text-sm font-medium text-gray-500">Sudah Dibayar</h3>
                 <p class="text-2xl font-bold text-green-600">
                     {{ $reservations->where('payment_status', 'paid')->count() }}
                 </p>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-sm font-medium text-gray-500">Pending Orders</h3>
+                <h3 class="text-sm font-medium text-gray-500">Menunggu Pembayaran</h3>
                 <p class="text-2xl font-bold text-yellow-600">
                     {{ $reservations->where('payment_status', 'pending')->count() }}
                 </p>
@@ -44,25 +44,25 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Order ID
+                            ID Pesanan
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Customer
+                            Pelanggan
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Passengers
+                            Penumpang
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            City
+                            Kota
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Amount
+                            Jumlah
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
+                            Tanggal
                         </th>
                     </tr>
                 </thead>
@@ -97,11 +97,11 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($reservation->payment_status == 'paid')
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                        Paid
+                                        Sudah Dibayar
                                     </span>
                                 @elseif($reservation->payment_status == 'pending')
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Pending
+                                        Menunggu Pembayaran
                                     </span>
                                 @else
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
@@ -118,7 +118,7 @@
                     @empty
                         <tr>
                             <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                                No orders found
+                                Tidak ada pesanan ditemukan
                             </td>
                         </tr>
                     @endforelse
