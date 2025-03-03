@@ -178,26 +178,40 @@ class AdminController extends Controller
         }, 'reservations.xlsx');
     }
 
+
+    // Update the getIncomeData method in AdminController.php to support year filtering
+
     public function getIncomeData(Request $request)
     {
         $months = $request->input('months', 3); // Default to 3 months
+        $year = $request->input('year', 'all'); // Default to all years
 
         // Get the end date (current month)
-        $endDate = Carbon::now();
+        $endDate = Carbon::now()->endOfMonth();
 
         // Get the start date (X months ago)
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
 
-        // Query the database for monthly income
-        $monthlyData = DB::table('reservations')
+        // Build the base query
+        $query = DB::table('reservations')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
-            ->where('reservations.payment_status', 'paid')
-            ->whereBetween('sessions.date', [$startDate, $endDate])
-            ->select(
-                DB::raw('YEAR(sessions.date) as year'),
-                DB::raw('MONTH(sessions.date) as month'),
-                DB::raw('SUM(reservations.price * reservations.count) as revenue')
-            )
+            ->where('reservations.payment_status', 'paid');
+
+        // Apply year filter if specified
+        if ($year !== 'all') {
+            $query->whereYear('sessions.date', $year);
+        } else {
+            // If no year specified, use the date range
+            $query->whereDate('sessions.date', '>=', $startDate)
+                ->whereDate('sessions.date', '<=', $endDate);
+        }
+
+        // Get monthly data
+        $monthlyData = $query->select(
+            DB::raw('YEAR(sessions.date) as year'),
+            DB::raw('MONTH(sessions.date) as month'),
+            DB::raw('SUM(reservations.price * reservations.count) as revenue')
+        )
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
@@ -206,7 +220,16 @@ class AdminController extends Controller
         // Format the data for the chart
         $formattedData = [];
 
-        // Create a collection of all months in the range
+        // Create a date period based on filter type
+        if ($year !== 'all') {
+            // For year filter, include all 12 months of the specified year
+            $startDate = Carbon::createFromDate($year, 1, 1)->startOfMonth();
+            $endDate = Carbon::createFromDate($year, 12, 31)->endOfMonth();
+
+            // When a specific year is selected, we ignore the months parameter
+            // and always show the full year
+        }
+
         $period = new \DatePeriod(
             $startDate,
             new \DateInterval('P1M'),
@@ -231,36 +254,38 @@ class AdminController extends Controller
 
         // Initialize the array with all months in the range (including those with zero revenue)
         foreach ($period as $date) {
-            $year = $date->format('Y');
+            $yearValue = $date->format('Y');
             $month = (int) $date->format('m');
 
             $formattedData[] = [
-                'month' => $indonesianMonths[$month] . ' ' . $year,
+                'month' => $indonesianMonths[$month] . ' ' . $yearValue,
                 'revenue' => 0,
-                'year' => $year,
+                'year' => $yearValue,
                 'month_num' => $month
             ];
         }
 
-        // Add the current month if not already included
-        $currentYear = $endDate->format('Y');
-        $currentMonth = (int) $endDate->format('m');
-        $currentMonthIncluded = false;
+        // Add the current month if not already included and we're not filtering by year
+        if ($year === 'all') {
+            $currentYear = $endDate->format('Y');
+            $currentMonth = (int) $endDate->format('m');
+            $currentMonthIncluded = false;
 
-        foreach ($formattedData as $data) {
-            if ($data['year'] == $currentYear && $data['month_num'] == $currentMonth) {
-                $currentMonthIncluded = true;
-                break;
+            foreach ($formattedData as $data) {
+                if ($data['year'] == $currentYear && $data['month_num'] == $currentMonth) {
+                    $currentMonthIncluded = true;
+                    break;
+                }
             }
-        }
 
-        if (!$currentMonthIncluded) {
-            $formattedData[] = [
-                'month' => $indonesianMonths[$currentMonth] . ' ' . $currentYear,
-                'revenue' => 0,
-                'year' => $currentYear,
-                'month_num' => $currentMonth
-            ];
+            if (!$currentMonthIncluded) {
+                $formattedData[] = [
+                    'month' => $indonesianMonths[$currentMonth] . ' ' . $currentYear,
+                    'revenue' => 0,
+                    'year' => $currentYear,
+                    'month_num' => $currentMonth
+                ];
+            }
         }
 
         // Fill in the actual revenue data
@@ -291,6 +316,8 @@ class AdminController extends Controller
 
         return response()->json($formattedData);
     }
+
+    // The getAvailableYears method already exists in your code, so no need to add it
 
     public function invoiceIndex(Request $request)
     {
@@ -501,10 +528,16 @@ class AdminController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
+        // Create date range for the selected month
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
         $revenue = DB::table('reservations')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
             ->whereYear('sessions.date', $year)
             ->whereMonth('sessions.date', $month)
+            ->whereDate('sessions.date', '>=', $startDate)
+            ->whereDate('sessions.date', '<=', $endDate)
             ->where('reservations.payment_status', 'paid')
             ->sum(DB::raw('reservations.price * reservations.count'));
 
