@@ -133,7 +133,10 @@ class AdminController extends Controller
             ->where('reservations.payment_status', 'paid')
             ->sum(DB::raw('reservations.price * reservations.count'));
 
-        return view('admin.financial.financial', compact('stats', 'recentReservations', 'monthlyRevenue'));
+        // Get the weekly salary data
+        $weeklySalaryData = $this->getWeeklySalaryData();
+
+        return view('admin.financial.financial', compact('stats', 'recentReservations', 'monthlyRevenue', 'weeklySalaryData'));
     }
 
     public function exportToExcel()
@@ -402,43 +405,173 @@ class AdminController extends Controller
         return view('admin.financial.report', compact('report'));
     }
 
+    private function getCurrentWeekDates()
+    {
+        $today = Carbon::now();
+
+        // Calculate the start of week (Monday)
+        $startOfWeek = $today->copy()->startOfWeek();
+
+        // Calculate the end of week (Sunday)
+        $endOfWeek = $today->copy()->endOfWeek();
+
+        return [
+            'start' => $startOfWeek->startOfDay(),
+            'end' => $endOfWeek->endOfDay(),
+        ];
+    }
+
+    private function getWeeklySalaryData()
+    {
+        $weekDates = $this->getCurrentWeekDates();
+
+        // Get reservations for the current week (Saturday and Sunday only)
+        $weeklyReservations = DB::table('reservations')
+            ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
+            ->whereBetween('sessions.date', [$weekDates['start'], $weekDates['end']])
+            ->where('reservations.payment_status', 'paid')
+            ->select('reservations.*', 'sessions.date')
+            ->get();
+
+        // Calculate total tickets sold this week
+        $totalTickets = $weeklyReservations->sum('count');
+
+        // Calculate admin's total cut (Rp5,000 per ticket)
+        $adminTotalSalary = $totalTickets * 5000;
+
+        // Calculate driver's salary by owner
+        $driverSalaryByOwner = [];
+
+        // Get all jeep allocations for these reservations
+        $reservationIds = $weeklyReservations->pluck('id')->toArray();
+
+        if (!empty($reservationIds)) {
+            $reserveJeeps = DB::table('reserve_jeep')
+                ->whereIn('reservation_id', $reservationIds)
+                ->get();
+
+            $jeepIds = $reserveJeeps->pluck('jeep_id')->unique()->toArray();
+
+            if (!empty($jeepIds)) {
+                $jeeps = DB::table('jeeps')
+                    ->join('owners', 'jeeps.owner_id', '=', 'owners.id')
+                    ->whereIn('jeeps.id', $jeepIds)
+                    ->select('jeeps.id as jeep_id', 'jeeps.number_plate', 'owners.id as owner_id', 'owners.name as owner_name')
+                    ->get();
+
+                // Map to easily find jeep details
+                $jeepDetails = [];
+                foreach ($jeeps as $jeep) {
+                    $jeepDetails[$jeep->jeep_id] = [
+                        'number_plate' => $jeep->number_plate,
+                        'owner_id' => $jeep->owner_id,
+                        'owner_name' => $jeep->owner_name
+                    ];
+                }
+
+                // Initialize owner salary data
+                $ownerSalaryData = [];
+
+                // Process each reservation and calculate driver's salary
+                foreach ($weeklyReservations as $reservation) {
+                    $jeepsForReservation = $reserveJeeps->where('reservation_id', $reservation->id);
+
+                    foreach ($jeepsForReservation as $jeepReservation) {
+                        if (isset($jeepDetails[$jeepReservation->jeep_id])) {
+                            $jeepInfo = $jeepDetails[$jeepReservation->jeep_id];
+                            $ownerId = $jeepInfo['owner_id'];
+                            $ownerName = $jeepInfo['owner_name'];
+
+                            if (!isset($ownerSalaryData[$ownerId])) {
+                                $ownerSalaryData[$ownerId] = [
+                                    'owner_name' => $ownerName,
+                                    'total_passengers' => 0,
+                                    'total_salary' => 0,
+                                    'jeeps' => []
+                                ];
+                            }
+
+                            if (!isset($ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id])) {
+                                $ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id] = [
+                                    'number_plate' => $jeepInfo['number_plate'],
+                                    'passengers' => 0,
+                                    'salary' => 0
+                                ];
+                            }
+
+                            // Calculate passengers per jeep (divide evenly if multiple jeeps)
+                            $passengersPerJeep = $reservation->count / $jeepsForReservation->count();
+                            $salaryPerJeep = $passengersPerJeep * 40000; // Rp40,000 per passenger
+
+                            $ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id]['passengers'] += $passengersPerJeep;
+                            $ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id]['salary'] += $salaryPerJeep;
+
+                            $ownerSalaryData[$ownerId]['total_passengers'] += $passengersPerJeep;
+                            $ownerSalaryData[$ownerId]['total_salary'] += $salaryPerJeep;
+                        }
+                    }
+                }
+
+                $driverSalaryByOwner = $ownerSalaryData;
+            }
+        }
+
+        return [
+            'week_start' => $weekDates['start']->format('Y-m-d'),
+            'week_end' => $weekDates['end']->format('Y-m-d'),
+            'total_tickets' => $totalTickets,
+            'admin_salary' => $adminTotalSalary,
+            'driver_salary' => $driverSalaryByOwner
+        ];
+    }
+
     // Jeep Management
     public function jeepManagement()
     {
+        // Get the original jeep management data
         $currentMonth = date('Y-m');
 
         $ownerData = DB::select("
-            SELECT 
-                o.id, 
-                o.name,
-                COUNT(DISTINCT j.id) as total_jeeps,
-                COALESCE(SUM(r.count), 0) as total_passengers,
-                COALESCE(SUM(CASE WHEN DATE_FORMAT(s.date, '%Y-%m') = ? THEN r.count ELSE 0 END), 0) as monthly_passengers
-            FROM owners o
-            LEFT JOIN jeeps j ON o.id = j.owner_id
-            LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
-            LEFT JOIN reservations r ON rj.reservation_id = r.id
-            LEFT JOIN sessions s ON r.session_id = s.id
-            GROUP BY o.id, o.name",
+        SELECT 
+            o.id, 
+            o.name,
+            COUNT(DISTINCT j.id) as total_jeeps,
+            COALESCE(SUM(r.count), 0) as total_passengers,
+            COALESCE(SUM(CASE WHEN DATE_FORMAT(s.date, '%Y-%m') = ? THEN r.count ELSE 0 END), 0) as monthly_passengers
+        FROM owners o
+        LEFT JOIN jeeps j ON o.id = j.owner_id
+        LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
+        LEFT JOIN reservations r ON rj.reservation_id = r.id
+        LEFT JOIN sessions s ON r.session_id = s.id
+        GROUP BY o.id, o.name",
             [$currentMonth]
         );
 
         DB::statement("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
 
         $jeeps = DB::select("
-            SELECT 
-                j.*,
-                o.name as owner_name,
-                COUNT(DISTINCT r.id) as total_trips,
-                COALESCE(SUM(r.count), 0) as total_passengers
-            FROM jeeps j
-            JOIN owners o ON j.owner_id = o.id
-            LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
-            LEFT JOIN reservations r ON rj.reservation_id = r.id
-            GROUP BY j.id, j.number_plate, j.owner_id, o.name
-        ");
+        SELECT 
+            j.*,
+            o.name as owner_name,
+            COUNT(DISTINCT r.id) as total_trips,
+            COALESCE(SUM(r.count), 0) as total_passengers
+        FROM jeeps j
+        JOIN owners o ON j.owner_id = o.id
+        LEFT JOIN reserve_jeep rj ON j.id = rj.jeep_id
+        LEFT JOIN reservations r ON rj.reservation_id = r.id
+        GROUP BY j.id, j.number_plate, j.owner_id, o.name
+    ");
 
-        return view('admin.jeep.index', compact('ownerData', 'jeeps'));
+        $weeklySalaryData = $this->getWeeklySalaryData();
+
+        return view('admin.jeep.index', compact('ownerData', 'jeeps', 'weeklySalaryData'));
+    }
+
+
+    public function weeklySalaryReport()
+    {
+        $weeklySalaryData = $this->getWeeklySalaryData();
+        return view('admin.financial.weekly_salary', compact('weeklySalaryData'));
     }
 
     public function storeOwner(Request $request)

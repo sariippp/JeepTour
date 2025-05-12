@@ -20,6 +20,20 @@
         <!-- Stats Cards -->
         <div class="row mb-4">
             @foreach($ownerData as $owner)
+
+                <!-- Weekly salary data for this owner -->
+                @php
+                    $weeklySalaryInfo = null;
+                    $weeklyPassengers = 0;
+                    $weeklySalary = 0;
+
+                    if (isset($weeklySalaryData['driver_salary'][$owner->id])) {
+                        $weeklySalaryInfo = $weeklySalaryData['driver_salary'][$owner->id];
+                        $weeklyPassengers = $weeklySalaryInfo['total_passengers'];
+                        $weeklySalary = $weeklySalaryInfo['total_salary'];
+                    }
+                @endphp
+
                 <div class="col-md-4 mb-3">
                     <div class="card">
                         <div class="card-body">
@@ -35,7 +49,9 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="row text-center">
+
+                            <!-- Standard Stats -->
+                            <div class="row text-center mb-3">
                                 <div class="col-4">
                                     <div class="text-muted small">Jeep</div>
                                     <h4>{{ $owner->total_jeeps }}</h4>
@@ -48,6 +64,41 @@
                                     <div class="text-muted small">Bulan Ini</div>
                                     <h4>{{ number_format($owner->monthly_passengers) }}</h4>
                                 </div>
+                            </div>
+
+                            <!-- Weekly Salary Section -->
+                            <div class="border-top pt-3 mt-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Gaji Mingguan</h6>
+                                    <small
+                                        class="text-muted">{{ Carbon\Carbon::parse($weeklySalaryData['week_start'])->format('d/m/Y') }}
+                                        - {{ Carbon\Carbon::parse($weeklySalaryData['week_end'])->format('d/m/Y') }}</small>
+                                </div>
+
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="text-muted small">Penumpang</div>
+                                        <h5 class="mb-0">{{ number_format($weeklyPassengers, 1) }}</h5>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-muted small">Gaji</div>
+                                        <h5 class="mb-0 text-success">Rp {{ number_format($weeklySalary) }}</h5>
+                                    </div>
+                                </div>
+
+                                @if($weeklySalaryInfo && count($weeklySalaryInfo['jeeps']) > 0)
+                                    <div class="mt-2">
+                                        @if($weeklySalaryInfo && count($weeklySalaryInfo['jeeps']) > 0)
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-info w-100"
+                                                    onclick="showSalaryDetails('{{ $owner->id }}')">
+                                                    Lihat Detail
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -100,10 +151,30 @@
         </div>
     </div>
 
+
+
     <!-- Modals -->
     @include('admin.partials.owner-modal')
     @include('admin.partials.jeep-modal')
 
+    <!-- Salary Details Modal -->
+    <div class="modal fade" id="salaryDetailsModal" tabindex="-1" aria-labelledby="salaryDetailsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="salaryDetailsModalLabel">Detail Gaji</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="salaryDetailsContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -111,11 +182,78 @@
         const ownerModal = new bootstrap.Modal(document.getElementById('ownerModal'));
         const jeepModal = new bootstrap.Modal(document.getElementById('jeepModal'));
 
+
         function showOwnerModal(id = null, name = '') {
             document.getElementById('ownerModalTitle').textContent = id ? 'Edit Pemilik' : 'Tambah Pemilik';
             document.getElementById('ownerId').value = id || '';
             document.getElementById('ownerName').value = name;
             ownerModal.show();
+        }
+
+        function showSalaryDetails(ownerId) {
+            // Get the modal element
+            const modal = new bootstrap.Modal(document.getElementById('salaryDetailsModal'));
+            const salaryContent = document.getElementById('salaryDetailsContent');
+
+            // Find the salary data for this owner
+            const ownerSalaryData = {
+                @foreach($ownerData as $owner)
+                    @if(isset($weeklySalaryData['driver_salary'][$owner->id]) && count($weeklySalaryData['driver_salary'][$owner->id]['jeeps']) > 0)
+                                        "{{ $owner->id }}": {
+                            "name": "{{ $owner->name }}",
+                            "jeeps": [
+                                @foreach($weeklySalaryData['driver_salary'][$owner->id]['jeeps'] as $jeepId => $jeep)
+                                                            {
+                                        "number_plate": "{{ $jeep['number_plate'] }}",
+                                        "passengers": "{{ number_format($jeep['passengers'], 1) }}",
+                                        "salary": "{{ number_format($jeep['salary']) }}"
+                                    },
+                                @endforeach
+                                            ]
+                        },
+                    @endif
+                @endforeach
+            };
+
+        // Build the content
+        if (ownerSalaryData[ownerId]) {
+            const data = ownerSalaryData[ownerId];
+            let content = `
+                    <h6>${data.name}</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Plat</th>
+                                    <th>Penumpang</th>
+                                    <th>Gaji</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+            // Add each jeep row
+            data.jeeps.forEach(jeep => {
+                content += `
+                        <tr>
+                            <td>${jeep.number_plate}</td>
+                            <td>${jeep.passengers}</td>
+                            <td>Rp ${jeep.salary}</td>
+                        </tr>
+                    `;
+            });
+
+            content += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+            salaryContent.innerHTML = content;
+
+            // Show the modal
+            modal.show();
+        }
         }
 
         function showJeepModal(id = null, numberPlate = '', ownerId = '') {

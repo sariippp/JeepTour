@@ -110,7 +110,7 @@
         <aside class="fixed top-0 left-0 z-40 h-screen transition-transform duration-300 sidebar"
                :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}">
             <div class="h-full w-64 bg-white border-r border-gray-200">
-                <!-- Logo -->
+                <!-- Logo -->                                           
                 <div class="flex items-center justify-between p-4 border-b">
                     <h1 class="text-xl font-semibold text-gray-800">Admin</h1>
                     <button @click="sidebarOpen = false" class="lg:hidden p-2 rounded-md hover:bg-gray-100">

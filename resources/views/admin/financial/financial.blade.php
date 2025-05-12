@@ -120,6 +120,47 @@
             </div>
         </div>
     </div>
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penumpang</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Gaji</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr class="bg-blue-50">
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">Admin (Rp5,000/tiket)</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ number_format($weeklySalaryData['total_tickets']) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-semibold">Rp {{ number_format($weeklySalaryData['admin_salary']) }}</td>
+                </tr>
+
+                @forelse($weeklySalaryData['driver_salary'] as $ownerId => $owner)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $owner['owner_name'] }} (Rp40,000/tiket)</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ number_format($owner['total_passengers']) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-semibold">Rp {{ number_format($owner['total_salary']) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">Tidak ada data gaji driver untuk minggu ini</td>
+                    </tr>
+                @endforelse
+
+                <tr class="bg-gray-100">
+                    <td class="px-6 py-4 whitespace-nowrap font-bold">Total</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-bold">{{ number_format($weeklySalaryData['total_tickets']) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-bold">Rp {{ number_format($weeklySalaryData['admin_salary'] + collect($weeklySalaryData['driver_salary'])->sum('total_salary')) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
