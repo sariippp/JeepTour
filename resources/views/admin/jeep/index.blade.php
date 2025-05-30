@@ -284,6 +284,7 @@
         function saveJeep() {
             const id = document.getElementById('jeepId').value;
             const number_plate = document.getElementById('numberPlate').value;
+            const total_passenger = 6;
             const owner_id = document.getElementById('jeepOwnerId').value;
             const url = id ?
                 '{{ route("admin.jeeps.vehicles.update", ":id") }}'.replace(':id', id) :
@@ -293,7 +294,7 @@
             $.ajax({
                 url: url,
                 method: method,
-                data: { number_plate, owner_id },
+                data: { number_plate, owner_id, total_passenger },
                 success: () => window.location.reload(),
                 error: (xhr) => alert(xhr.responseJSON.message || 'Error menyimpan jeep')
             });

@@ -21,6 +21,7 @@
                             @endforeach
                         </select>
                     </div>
+                    <input type="hidden" name="total_passanger" value="4">
                 </form>
             </div>
             <div class="modal-footer">
