@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             JeepSeeder::class,
             ReservationSeeder::class,
             ReservedJeepSeeder::class,
-            InvoiceSeeder::class
+            InvoiceSeeder::class,
         ]);
     }
 }

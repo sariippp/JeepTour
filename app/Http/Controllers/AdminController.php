@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Jeep;
 use App\Models\Owner;
 use App\Models\Reservation;
+use App\Models\Session;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -91,7 +93,7 @@ class AdminController extends Controller
             }
 
         } catch (\Exception $e) {
-            \Log::error('User creation error: ' . $e->getMessage());
+            Log::error('User creation error: ' . $e->getMessage());
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -694,5 +696,98 @@ class AdminController extends Controller
         $jeep->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    // SESSION
+    public function sessionDashboard()
+    {
+        $sessions = Session::orderBy('date', 'asc')
+            ->orderBy('session_time', 'asc')
+            ->get();
+
+        return view('admin.session.index', compact('sessions'));
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:sessions,id',
+            'session_time' => 'required',
+            'passenger_count' => 'required|integer|min:0',
+        ]);
+
+        $session = Session::find($request->id);
+        $session->session_time = $request->session_time;
+        $session->passenger_count = $request->passenger_count;
+        $session->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Session berhasil diperbarui!',
+            'session' => $session
+        ]);
+    }
+
+    public function generate(Request $request)
+    {
+        $now = Carbon::now();
+
+        $startOfMonth = $now->copy()->startOfMonth();
+        $endOfMonth   = $now->copy()->endOfMonth();
+
+        // Cek apakah bulan ini sudah ada
+        $exists = Session::whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => '⚠️ Sessions untuk bulan ini sudah pernah digenerate.'
+            ], 400);
+        }
+
+        $sessionTimes = [
+            '09:00:00', '10:00:00', '11:00:00',
+            '12:00:00', '13:00:00', '14:00:00',
+            '15:00:00', '16:00:00', '17:00:00'
+        ];
+
+        for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
+            if ($date->isWeekend()) {
+                foreach ($sessionTimes as $time) {
+                    Session::create([
+                        'date'            => $date->toDateString(),
+                        'session_time'    => $time,
+                        'passenger_count' => 24,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '✅ Sessions berhasil digenerate untuk weekend bulan ini.'
+        ]);
+    }
+
+    public function closeAllDay(Request $request)
+    {
+        try {
+            $date = $request->input('date');
+            
+            Session::where('date', $date)
+                ->update(['passenger_count' => 0]);
+                
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua sesi pada tanggal ' . $date . ' berhasil ditutup'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menutup semua sesi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

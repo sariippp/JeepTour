@@ -46,6 +46,11 @@ Route::group(
         Route::post('/jeeps/vehicles', [AdminController::class, 'storeJeep'])->name('jeeps.vehicles.store');
         Route::put('/jeeps/vehicles/{id}', [AdminController::class, 'updateJeep'])->name('jeeps.vehicles.update');
         Route::delete('/jeeps/vehicles/{id}', [AdminController::class, 'deleteJeep'])->name('jeeps.vehicles.delete');
+
+        Route::get('/sessions', [AdminController::class, 'sessionDashboard'])->name('sessions');
+        Route::post('/sessions/update', [AdminController::class, 'update'])->name('sessions.update');
+        Route::post('/generate-monthly-session', [AdminController::class, 'generate'])->name('sessions.generate');
+        Route::post('/sessions/close-all-day', [AdminController::class, 'closeAllDay'])->name('sessions.closeAllDay');
     }
 );
 
