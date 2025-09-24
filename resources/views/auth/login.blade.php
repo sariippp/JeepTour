@@ -26,7 +26,7 @@
                 text-gray-800
                 mb-2
             ">
-                Selamat Datang Kembali
+                Selamat Datang
             </h1>
 
             {{-- Error Messages --}}
