@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('email');
             $table->string('telp');
+            $table->string('payment_order_id')->nullable();
+            $table->timestamp('payment_date')->nullable();
             $table->string('city');
             $table->integer('count');
             $table->double('price');
