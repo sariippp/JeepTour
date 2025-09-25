@@ -181,6 +181,48 @@ class AdminController extends Controller
         }, 'reservations.xlsx');
     }
 
+    public function exportToExcelThisMonth()
+    {
+        return Excel::download(new class implements FromCollection, WithHeadings, WithMapping {
+            public function collection()
+            {
+                return Reservation::with('session')->whereMonth('created_at', Carbon::now()->month)->whereYear('created_at',Carbon::now()->year)->get();
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'ID',
+                    'Customer Name',
+                    'City',
+                    'Passengers',
+                    'Price',
+                    'Total',
+                    'Date',
+                    'Session Time',
+                    'Payment Status',
+                    'Created At',
+                ];
+            }
+
+            public function map($reservation): array
+            {
+                return [
+                    $reservation->id,
+                    $reservation->name,
+                    $reservation->city,
+                    $reservation->count,
+                    $reservation->price,
+                    $reservation->price * $reservation->count,
+                    $reservation->session ? Carbon::parse($reservation->session->date)->format('Y-m-d') : 'N/A',
+                    $reservation->session ? $reservation->session->session_time : 'N/A',
+                    ucfirst($reservation->payment_status),
+                    $reservation->created_at ? Carbon::parse($reservation->created_at)->format('Y-m-d H:i:s') : 'N/A',
+                ];
+            }
+        }, 'reservations.xlsx');
+    }
+
 
     public function getIncomeData(Request $request)
     {

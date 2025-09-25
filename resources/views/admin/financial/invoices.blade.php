@@ -12,6 +12,9 @@
                         class="w-80 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         id="searchInput" value="{{ request('search') }}">
                 </div>
+                <a href="{{ route('admin.invoices.exportThisMonth') }}" class="bg-green-500 text-white px-4 py-2 rounded">
+                    Unduh Excel Bulan Ini
+                </a>
                 <a href="{{ route('admin.invoices.export') }}" class="bg-green-500 text-white px-4 py-2 rounded">
                     Unduh Excel
                 </a>
