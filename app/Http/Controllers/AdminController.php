@@ -116,7 +116,6 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'User berhasil dihapus');
     }
 
-    // Financial Management
     public function financialDashboard()
     {
         $stats = $this->getFinancialStats();
@@ -135,7 +134,6 @@ class AdminController extends Controller
             ->where('reservations.payment_status', 'paid')
             ->sum(DB::raw('reservations.price * reservations.count'));
 
-        // Get the weekly salary data
         $weeklySalaryData = $this->getWeeklySalaryData();
 
         return view('admin.financial.financial', compact('stats', 'recentReservations', 'monthlyRevenue', 'weeklySalaryData'));
@@ -184,34 +182,26 @@ class AdminController extends Controller
     }
 
 
-    // Update the getIncomeData method in AdminController.php to support year filtering
-
     public function getIncomeData(Request $request)
     {
-        $months = $request->input('months', 3); // Default to 3 months
-        $year = $request->input('year', 'all'); // Default to all years
+        $months = $request->input('months', 3); 
+        $year = $request->input('year', 'all');
 
-        // Get the end date (current month)
         $endDate = Carbon::now()->endOfMonth();
 
-        // Get the start date (X months ago)
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
 
-        // Build the base query
         $query = DB::table('reservations')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
             ->where('reservations.payment_status', 'paid');
 
-        // Apply year filter if specified
         if ($year !== 'all') {
             $query->whereYear('sessions.date', $year);
         } else {
-            // If no year specified, use the date range
             $query->whereDate('sessions.date', '>=', $startDate)
                 ->whereDate('sessions.date', '<=', $endDate);
         }
 
-        // Get monthly data
         $monthlyData = $query->select(
             DB::raw('YEAR(sessions.date) as year'),
             DB::raw('MONTH(sessions.date) as month'),
@@ -222,17 +212,13 @@ class AdminController extends Controller
             ->orderBy('month')
             ->get();
 
-        // Format the data for the chart
         $formattedData = [];
 
-        // Create a date period based on filter type
+
         if ($year !== 'all') {
-            // For year filter, include all 12 months of the specified year
             $startDate = Carbon::createFromDate($year, 1, 1)->startOfMonth();
             $endDate = Carbon::createFromDate($year, 12, 31)->endOfMonth();
 
-            // When a specific year is selected, we ignore the months parameter
-            // and always show the full year
         }
 
         $period = new \DatePeriod(
@@ -241,7 +227,6 @@ class AdminController extends Controller
             $endDate
         );
 
-        // Indonesian month names
         $indonesianMonths = [
             1 => 'Januari',
             2 => 'Februari',
@@ -257,7 +242,6 @@ class AdminController extends Controller
             12 => 'Desember'
         ];
 
-        // Initialize the array with all months in the range (including those with zero revenue)
         foreach ($period as $date) {
             $yearValue = $date->format('Y');
             $month = (int) $date->format('m');
@@ -270,7 +254,6 @@ class AdminController extends Controller
             ];
         }
 
-        // Add the current month if not already included and we're not filtering by year
         if ($year === 'all') {
             $currentYear = $endDate->format('Y');
             $currentMonth = (int) $endDate->format('m');
@@ -293,7 +276,6 @@ class AdminController extends Controller
             }
         }
 
-        // Fill in the actual revenue data
         foreach ($monthlyData as $data) {
             foreach ($formattedData as &$item) {
                 if ($item['year'] == $data->year && $item['month_num'] == $data->month) {
@@ -303,7 +285,6 @@ class AdminController extends Controller
             }
         }
 
-        // Sort by year and month
         usort($formattedData, function ($a, $b) {
             if ($a['year'] !== $b['year']) {
                 return $a['year'] <=> $b['year'];
@@ -311,7 +292,6 @@ class AdminController extends Controller
             return $a['month_num'] <=> $b['month_num'];
         });
 
-        // Remove helper fields not needed for the chart
         $formattedData = array_map(function ($item) {
             return [
                 'month' => $item['month'],
@@ -321,8 +301,6 @@ class AdminController extends Controller
 
         return response()->json($formattedData);
     }
-
-    // The getAvailableYears method already exists in your code, so no need to add it
 
     public function invoiceIndex(Request $request)
     {
@@ -411,10 +389,8 @@ class AdminController extends Controller
     {
         $today = Carbon::now();
 
-        // Calculate the start of week (Monday)
         $startOfWeek = $today->copy()->startOfWeek();
 
-        // Calculate the end of week (Sunday)
         $endOfWeek = $today->copy()->endOfWeek();
 
         return [
@@ -427,7 +403,6 @@ class AdminController extends Controller
     {
         $weekDates = $this->getCurrentWeekDates();
 
-        // Get reservations for the current week (Saturday and Sunday only)
         $weeklyReservations = DB::table('reservations')
             ->join('sessions', 'reservations.session_id', '=', 'sessions.id')
             ->whereBetween('sessions.date', [$weekDates['start'], $weekDates['end']])
@@ -435,16 +410,12 @@ class AdminController extends Controller
             ->select('reservations.*', 'sessions.date')
             ->get();
 
-        // Calculate total tickets sold this week
         $totalTickets = $weeklyReservations->sum('count');
 
-        // Calculate admin's total cut (Rp5,000 per ticket)
         $adminTotalSalary = $totalTickets * 5000;
 
-        // Calculate driver's salary by owner
         $driverSalaryByOwner = [];
 
-        // Get all jeep allocations for these reservations
         $reservationIds = $weeklyReservations->pluck('id')->toArray();
 
         if (!empty($reservationIds)) {
@@ -461,7 +432,6 @@ class AdminController extends Controller
                     ->select('jeeps.id as jeep_id', 'jeeps.number_plate', 'owners.id as owner_id', 'owners.name as owner_name')
                     ->get();
 
-                // Map to easily find jeep details
                 $jeepDetails = [];
                 foreach ($jeeps as $jeep) {
                     $jeepDetails[$jeep->jeep_id] = [
@@ -471,10 +441,8 @@ class AdminController extends Controller
                     ];
                 }
 
-                // Initialize owner salary data
                 $ownerSalaryData = [];
 
-                // Process each reservation and calculate driver's salary
                 foreach ($weeklyReservations as $reservation) {
                     $jeepsForReservation = $reserveJeeps->where('reservation_id', $reservation->id);
 
@@ -501,10 +469,8 @@ class AdminController extends Controller
                                 ];
                             }
 
-                            // Calculate passengers per jeep (divide evenly if multiple jeeps)
                             $passengersPerJeep = $reservation->count / $jeepsForReservation->count();
-                            $salaryPerJeep = $passengersPerJeep * 40000; // Rp40,000 per passenger
-
+                            $salaryPerJeep = $passengersPerJeep * 40000;
                             $ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id]['passengers'] += $passengersPerJeep;
                             $ownerSalaryData[$ownerId]['jeeps'][$jeepReservation->jeep_id]['salary'] += $salaryPerJeep;
 
@@ -527,10 +493,8 @@ class AdminController extends Controller
         ];
     }
 
-    // Jeep Management
     public function jeepManagement()
     {
-        // Get the original jeep management data
         $currentMonth = date('Y-m');
 
         $ownerData = DB::select("
@@ -663,7 +627,6 @@ class AdminController extends Controller
         $month = $request->input('month', now()->month);
         $year = $request->input('year', now()->year);
 
-        // Create date range for the selected month
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
@@ -735,7 +698,6 @@ class AdminController extends Controller
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth   = $now->copy()->endOfMonth();
 
-        // Cek apakah bulan ini sudah ada
         $exists = Session::whereBetween('date', [$startOfMonth->toDateString(), $endOfMonth->toDateString()])
             ->exists();
 

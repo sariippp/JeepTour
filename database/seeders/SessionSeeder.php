@@ -16,32 +16,32 @@ class SessionSeeder extends Seeder
     public function run(): void
     {
         Session::create([
-            'date' => '2025-05-31',
+            'date' => '2025-10-04',
             'session_time' => '09:00',
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-05-31',
+            'date' => '2025-10-04',
             'session_time' => '10:00',
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-05-31',
+            'date' => '2025-10-04',
             'session_time' => '11:00',
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-06-01',
+            'date' => '2025-10-05',
             'session_time' => '09:00',
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-06-01',
+            'date' => '2025-10-05',
             'session_time' => '10:00',
             'passenger_count' => 24,
         ]);
         Session::create([
-            'date' => '2025-06-01',
+            'date' => '2025-10-05',
             'session_time' => '11:00',
             'passenger_count' => 24,
         ]);
